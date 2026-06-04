@@ -23,6 +23,30 @@ The skill is a **hybrid**: this markdown guides Claude through discovery (which 
 
 ---
 
+## Environment and paths (read first)
+ 
+This skill was originally authored for the claude.ai web sandbox, so later steps spell out
+`/mnt/...` paths and the `ask_user_input_v0` / `present_files` tools. **Those are placeholders,
+not literal paths.** Resolve them once for the current environment and use the resolved values
+everywhere they appear below. The Python (`build_report.py`, `resolve_window.py`) is already
+fully portable — every path is a CLI argument — so nothing in the scripts needs editing.
+ 
+| Placeholder in this doc | claude.ai web sandbox | Claude Code / local CLI |
+|---|---|---|
+| **Skill base dir** (`/mnt/skills/user/weekly-report/`) | `/mnt/skills/user/weekly-report/` | the directory this `SKILL.md` lives in (the "Base directory for this skill" announced on launch) |
+| **Work dir** (scratch for `q_*.json`, `context.json`, script copies) | `/home/claude/` | a fresh temp dir, e.g. `mktemp -d` |
+| **Output dir** (final HTML) | `/mnt/user-data/outputs/` | a local dir you control, e.g. `./weekly-report-outputs/` or `~/weekly-report-outputs/` (create it) |
+| **Uploads dir** (branding logo/screenshot, Step 1.5) | `/mnt/user-data/uploads/` | wherever the user put the file — ask for an absolute path instead of scanning a fixed dir |
+| **Branding question** (`ask_user_input_v0`, Step 1.5) | `ask_user_input_v0` | the `AskUserQuestion` tool |
+| **Present the result** (`present_files`, Step 5) | `present_files` | there is no present tool — state the absolute output path and offer to open it (e.g. `xdg-open` / `open`) |
+ 
+The scripts do not need to live next to the workdir — point `--template`, `--defaults`, and
+`build_report.py` straight at the skill base dir if you prefer, and `--output` at your output dir.
+Everywhere a later step shows a `/mnt/...` path or one of those two tool names, substitute the
+right-hand column when you are not on the web sandbox.
+ 
+---
+
 ## Step 1 — Gather parameters
 
 If the user didn't provide them, ask for:
