@@ -753,7 +753,7 @@ def build_data(workdir, cfg):
                     f"the week ending {ctx['week_end']} for an apples-to-apples view. Check the ad ingestion pipeline if the lag persists."})
 
     scale_t = cfg["advertising"]["portfolio_scale_roas"]
-    bg = next((p for p in ads.get("portfolios_cw", []) if p["name"] != "Unassigned"), None)
+    bg = next((p for p in ads.get("portfolios_cw", []) if p["name"] != "Unassigned" and p.get("roas") is not None), None)
     if bg and bg["roas"] > scale_t:
         recs.append({"pri": "Low", "title": f"Scale the '{bg['name']}' portfolio",
             "body": f"ROAS {bg['roas']:.0f} on just ${bg['spend']:,.0f} spend — clear room to add budget and capture more of that demand."})
