@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weekly Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0e7490; --primary-deep:#0b5566; --accent:#e07856;
+  --pos:#2f7a4f; --warn:#c2691c; --danger:#b4453a;
+  --ink:#1c2630; --ink-soft:#56616b; --line:#e6e1d6; --line-soft:#efebe2;
+  --paper:#f7f5ef; --card:#fffdf8; --card-2:#fbf9f2;
+  --shadow:0 1px 2px rgba(28,38,48,.04),0 8px 24px -12px rgba(28,38,48,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+body{background-image:radial-gradient(circle at 12% -10%,rgba(14,116,144,.06),transparent 45%),radial-gradient(circle at 92% -5%,rgba(224,120,86,.05),transparent 40%);}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px}
+a{color:inherit}
+.mono{font-family:"DM Mono",monospace}
+
+/* header */
+header.top{background:linear-gradient(135deg,#0b5566 0%,#0e7490 55%,#10788f 100%);color:#f4f1ea;
+  position:relative;overflow:hidden;border-bottom:3px solid var(--accent)}
+header.top::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 85% 120%,rgba(224,120,86,.28),transparent 50%);pointer-events:none}
+.top-in{max-width:1180px;margin:0 auto;padding:30px 24px 26px;position:relative;z-index:1}
+.brand-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand-name{font-family:"Fraunces",serif;font-weight:600;font-size:40px;letter-spacing:-.5px;line-height:1}
+.brand-name .sun{color:#ffd9a0}
+.kicker{text-transform:uppercase;letter-spacing:.22em;font-size:11px;font-weight:600;opacity:.82;margin-bottom:9px}
+.meta{text-align:right;font-size:13px;line-height:1.5;opacity:.92}
+.meta b{font-weight:600}
+.meta .week{font-family:"Fraunces",serif;font-size:19px;font-weight:500;opacity:1}
+
+/* tabs */
+nav.tabs{position:sticky;top:0;z-index:20;background:rgba(247,245,239,.86);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);margin-bottom:30px}
+.tabs-in{max-width:1180px;margin:0 auto;padding:0 16px;display:flex;gap:2px;overflow-x:auto}
+.tab{appearance:none;border:0;background:none;cursor:pointer;white-space:nowrap;
+  font-family:"DM Sans";font-size:14px;font-weight:600;color:var(--ink-soft);
+  padding:15px 16px 13px;border-bottom:2.5px solid transparent;transition:.16s}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--primary);border-color:var(--primary)}
+
+section.panel{display:none;animation:fade .3s ease}
+section.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+h2.sec{font-family:"Fraunces",serif;font-weight:600;font-size:23px;letter-spacing:-.3px;margin:34px 0 16px}
+h2.sec:first-child{margin-top:0}
+.sub{color:var(--ink-soft);font-size:13.5px;margin:-10px 0 18px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.pad{padding:20px 22px}
+
+/* lead story */
+.lead{display:flex;gap:18px;align-items:flex-start;border-left:4px solid var(--danger);
+  background:linear-gradient(180deg,#fff8f3,#fffdf8);margin-bottom:26px}
+.lead .ico{flex:none;width:42px;height:42px;border-radius:11px;display:grid;place-items:center;
+  background:var(--danger);color:#fff;font-family:"Fraunces";font-weight:700;font-size:22px;margin-top:2px}
+.lead h3{margin:0 0 4px;font-family:"Fraunces",serif;font-size:18px;font-weight:600}
+.lead p{margin:0;color:var(--ink-soft);font-size:14px;line-height:1.55}
+.lead .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--danger);background:#fbe7e1;padding:3px 9px;border-radius:20px;margin-bottom:8px}
+
+/* kpi grid */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.kpis{grid-template-columns:1fr}}
+.kpi{padding:16px 17px 14px;position:relative;overflow:hidden}
+.kpi .lab{font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.01em}
+.kpi .lab .sub{font-weight:400;font-size:10.5px;opacity:.8;margin:0}
+.kpi .val{font-family:"Fraunces",serif;font-weight:600;font-size:27px;letter-spacing:-.5px;margin:7px 0 2px;line-height:1}
+.kpi .cmp{display:flex;gap:11px;flex-wrap:wrap;font-size:11.5px;margin-top:8px}
+.kpi .cmp span{color:var(--ink-soft)}
+.kpi .cmp b{font-family:"DM Mono";font-weight:500;font-size:11.5px}
+.up{color:var(--pos)} .dn{color:var(--danger)}
+.kpi svg.spk{position:absolute;right:12px;bottom:12px;opacity:.9}
+
+/* callouts */
+.callouts{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:8px}
+@media(max-width:760px){.callouts{grid-template-columns:1fr}}
+.co{padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.co .h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;margin-bottom:5px}
+.co .h .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.co p{margin:0;font-size:12.8px;line-height:1.5;color:var(--ink-soft)}
+.co.warn{background:#fdf6ef} .co.warn .dot{background:var(--warn)}
+.co.good{background:#f1f8f3} .co.good .dot{background:var(--pos)}
+.co.info{background:#f0f6f8} .co.info .dot{background:var(--primary)}
+
+/* charts */
+.chart-card{padding:20px 22px 16px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:12px;flex-wrap:wrap}
+.chart-head h3{margin:0;font-family:"Fraunces",serif;font-weight:600;font-size:16px}
+.toggle{display:flex;gap:4px;background:var(--card-2);border:1px solid var(--line);border-radius:9px;padding:3px}
+.toggle button{appearance:none;border:0;background:none;cursor:pointer;font-family:"DM Sans";font-weight:600;
+  font-size:11.5px;color:var(--ink-soft);padding:5px 11px;border-radius:6px}
+.toggle button.on{background:var(--primary);color:#fff}
+.legend{display:flex;gap:16px;font-size:11.5px;color:var(--ink-soft);margin-top:4px;flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.legend i.dash{height:0;border-top:2px dashed currentColor;width:14px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:840px){.grid2{grid-template-columns:1fr}}
+.grid-ad{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+@media(max-width:840px){.grid-ad{grid-template-columns:1fr}}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);font-weight:700;
+  cursor:pointer;user-select:none;border-bottom:1.5px solid var(--line)}
+thead th.sortable:hover{color:var(--primary)}
+tbody tr:hover{background:var(--card-2)}
+td.num{font-family:"DM Mono";font-weight:400}
+.pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;padding:2.5px 8px;border-radius:20px;margin-left:5px}
+.pill.lowbb{background:#fbe7e1;color:var(--danger)}
+.pill.oos{background:#fdeede;color:var(--warn)}
+.pill.surge{background:#e7f3ec;color:var(--pos)}
+.bar-cell{position:relative}
+.asin-sub{display:block;font-size:11px;color:var(--ink-soft);font-family:"DM Mono"}
+
+/* ad kpis */
+.adkpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:6px}
+@media(max-width:760px){.adkpis{grid-template-columns:repeat(2,1fr)}}
+.adk{padding:13px 15px}
+.adk .lab{font-size:11px;color:var(--ink-soft);font-weight:600}
+.adk .val{font-family:"Fraunces",serif;font-size:21px;font-weight:600;margin-top:5px}
+.adk .d{font-size:11px;margin-top:3px;font-family:"DM Mono"}
+
+/* customer */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:680px){.stat-row{grid-template-columns:1fr}}
+.bigstat .n{font-family:"Fraunces",serif;font-size:30px;font-weight:600;letter-spacing:-.5px}
+.bigstat .l{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+
+/* recommendations */
+.rec{display:flex;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line-soft)}
+.rec:last-child{border-bottom:0}
+.rec .pri{flex:none;width:74px}
+.rbadge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:7px}
+.rbadge.High{background:#fbe7e1;color:var(--danger)}
+.rbadge.Medium{background:#fdf0df;color:var(--warn)}
+.rbadge.Low{background:#eef1f3;color:var(--ink-soft)}
+.rec h4{margin:0 0 4px;font-size:15px;font-weight:600}
+.rec p{margin:0;font-size:13.3px;color:var(--ink-soft);line-height:1.55}
+
+footer{margin-top:40px;text-align:center;color:var(--ink-soft);font-size:12px;line-height:1.7}
+.note{background:#f0f6f8;border:1px solid #d8e8ec;border-radius:11px;padding:13px 16px;font-size:12.8px;
+  color:var(--primary-deep);line-height:1.55;margin-top:8px}
+.note b{color:var(--primary-deep)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand-row">
+      <div>
+        <div class="kicker">Weekly Performance Report</div>
+        <div class="brand-name" id="m-brand"></div>
+      </div>
+      <div class="meta">
+        <div class="week" id="m-week"></div>
+        <div id="m-acct"></div>
+        <div id="m-fresh"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs"><div class="tabs-in" id="tabbar"></div></nav>
+
+<div class="wrap">
+  <section class="panel active" data-p="exec"></section>
+  <section class="panel" data-p="sales"></section>
+  <section class="panel" data-p="ads"></section>
+  <section class="panel" data-p="prod"></section>
+  <section class="panel" data-p="cust"></section>
+  <section class="panel" data-p="rec"></section>
+  <footer>
+    <div>Generated from Kapoq Datalink · Tenant: <b id="f-ten"></b> · Channel: <b id="f-chan"></b></div>
+    <div id="f-fresh"></div>
+  </footer>
+</div>
+
+<script>
+const DATA = __DATA__;
+</script>
+<script>
+/* ---------- branding ---------- */
+/* Brand colors come from the injected data (DATA.ctx.branding), set in Step 1.5.
+   All-null = the default look, so an unbranded report is byte-identical to before.
+   These two constants replace the previously hardcoded chart hexes, and we mirror
+   them onto the CSS custom properties so tabs/accents/stats pick the brand up too.
+   The logo path is handled later where the masthead is populated. */
+const _BR=(DATA.ctx&&DATA.ctx.branding)||{};
+const BP=_BR.primary||'#0e7490';   /* brand primary (was #0e7490) */
+const BA=_BR.accent||'#e07856';    /* brand accent  (was #e07856) */
+try{document.documentElement.style.setProperty('--primary',BP);
+    document.documentElement.style.setProperty('--accent',BA);}catch(e){}
+
+/* ---------- formatting ---------- */
+const fmtUsd=v=>'$'+Math.round(v).toLocaleString();
+const fmtUsd2=v=>'$'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtInt=v=>Math.round(v).toLocaleString();
+const fmtPct=v=>v.toFixed(1)+'%';
+const fmtX=v=>v.toFixed(2)+'×';
+const fmtK=v=>v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(0)+'k':'$'+Math.round(v);
+function fmt(v,f){return f==='usd'?fmtUsd(v):f==='usd2'?fmtUsd2(v):f==='int'?fmtInt(v):f==='pct'?fmtPct(v):f==='x'?fmtX(v):v;}
+const wkLabel=s=>{const d=new Date(s+'T00:00:00');return (d.getMonth()+1)+'/'+d.getDate();};
+function delta(cur,base,goodUp){const p=(cur/base-1)*100; if(!isFinite(p))return {t:'—',c:''};
+  const good=goodUp?p>=0:p<=0; return {t:(p>=0?'+':'')+p.toFixed(1)+'%', c: Math.abs(p)<0.05?'':(good?'up':'dn')};}
+
+/* ---------- tiny svg chart kit ---------- */
+const NS='http://www.w3.org/2000/svg';
+function el(t,a={}){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function sparkline(vals,w=72,h=26,color=BP){
+  const mn=Math.min(...vals),mx=Math.max(...vals),rng=mx-mn||1;
+  const pts=vals.map((v,i)=>[i/(vals.length-1)*w,h-3-((v-mn)/rng)*(h-6)]);
+  const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const svg=el('svg',{class:'spk',width:w,height:h,viewBox:`0 0 ${w} ${h}`});
+  const area=el('path',{d:d+` L ${w} ${h} L 0 ${h} Z`,fill:color,opacity:.08});
+  svg.appendChild(area);
+  svg.appendChild(el('path',{d,fill:'none',stroke:color,'stroke-width':1.6,'stroke-linecap':'round','stroke-linejoin':'round'}));
+  const last=pts[pts.length-1];
+  svg.appendChild(el('circle',{cx:last[0],cy:last[1],r:2.4,fill:color}));
+  return svg;
+}
+/* multi-series line chart with axis */
+function lineChart(box,{series,labels,fmtY,height=240,benchmark=null}){
+  const w=box.clientWidth||760,h=height,padL=54,padR=14,padT=14,padB=28;
+  const iw=w-padL-padR, ih=h-padT-padB;
+  const benchVals=benchmark?(benchmark.data||(benchmark.value!=null?[benchmark.value]:[])):[];
+  const all=series.flatMap(s=>s.data).concat(benchVals).filter(v=>v!=null&&!(typeof v==='number'&&isNaN(v)));
+  let mn=Math.min(...all),mx=Math.max(...all); const span=mx-mn||1; mn-=span*0.08; mx+=span*0.08; if(mn>0&&mn<span)mn=Math.min(mn,0)||mn;
+  const X=i=>padL+i/(labels.length-1)*iw, Y=v=>padT+ih-((v-mn)/(mx-mn))*ih;
+  const svg=el('svg',{width:'100%',height:h,viewBox:`0 0 ${w} ${h}`,style:'overflow:visible'});
+  // gridlines
+  for(let g=0;g<=4;g++){const v=mn+(mx-mn)*g/4,y=Y(v);
+    svg.appendChild(el('line',{x1:padL,x2:w-padR,y1:y,y2:y,stroke:'#e9e4d9','stroke-width':1}));
+    const tx=el('text',{x:padL-8,y:y+3.5,'text-anchor':'end','font-size':10,fill:'#8a929a','font-family':'DM Mono'});tx.textContent=fmtY(v);svg.appendChild(tx);}
+  // x labels
+  labels.forEach((l,i)=>{if(labels.length>9&&i%2)return;const tx=el('text',{x:X(i),y:h-9,'text-anchor':'middle','font-size':10,fill:'#8a929a','font-family':'DM Mono'});tx.textContent=l;svg.appendChild(tx);});
+  if(benchmark){const y=Y(benchmark.value!=null?benchmark.value:benchmark.data[0]);
+    svg.appendChild(el('line',{x1:padL,x2:w-padR,y1:y,y2:y,stroke:benchmark.color||'#b4453a','stroke-width':1.5,'stroke-dasharray':'5 4'}));
+    const tx=el('text',{x:w-padR,y:y-5,'text-anchor':'end','font-size':10,fill:benchmark.color||'#b4453a','font-weight':600});tx.textContent=benchmark.label;svg.appendChild(tx);}
+  series.forEach(s=>{
+    const d=s.data.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' ');
+    if(s.fill)svg.appendChild(el('path',{d:d+` L ${X(s.data.length-1)} ${padT+ih} L ${padL} ${padT+ih} Z`,fill:s.color,opacity:.07}));
+    svg.appendChild(el('path',{d,fill:'none',stroke:s.color,'stroke-width':2.2,'stroke-linecap':'round','stroke-linejoin':'round'}));
+    s.data.forEach((v,i)=>{svg.appendChild(el('circle',{cx:X(i),cy:Y(v),r:2.6,fill:'#fffdf8',stroke:s.color,'stroke-width':1.6}));});
+  });
+  box.innerHTML='';box.appendChild(svg);
+}
+/* sessions bars + BB line dual axis */
+function dualChart(box,{labels,bars,line,height=240}){
+  const lineActive = line && line.data && line.data.some(v=>v!=null && v!==0 && !(typeof v==='number'&&isNaN(v)));
+  const w=box.clientWidth||760,h=height,padL=50,padR=lineActive?46:14,padT=14,padB=28;
+  const iw=w-padL-padR,ih=h-padT-padB;
+  const bmax=Math.max(...bars.data)*1.12;
+  const lmin=lineActive?Math.min(...line.data)*0.96:0,lmax=lineActive?Math.max(...line.data)*1.02:1;
+  const bw=iw/labels.length*0.6;
+  const X=i=>padL+(i+0.5)/labels.length*iw;
+  const YB=v=>padT+ih-(v/bmax)*ih;
+  const YL=v=>padT+ih-((v-lmin)/(lmax-lmin||1))*ih;
+  const svg=el('svg',{width:'100%',height:h,viewBox:`0 0 ${w} ${h}`,style:'overflow:visible'});
+  for(let g=0;g<=4;g++){const y=padT+ih*g/4;svg.appendChild(el('line',{x1:padL,x2:w-padR,y1:y,y2:y,stroke:'#e9e4d9'}));
+    const v=bmax*(1-g/4);const tx=el('text',{x:padL-8,y:y+3.5,'text-anchor':'end','font-size':10,fill:'#8a929a','font-family':'DM Mono'});tx.textContent=Math.round(v/1000)+'k';svg.appendChild(tx);
+    if(lineActive){const v2=lmax-(lmax-lmin)*g/4;const t2=el('text',{x:w-padR+8,y:y+3.5,'text-anchor':'start','font-size':10,fill:'#c2691c','font-family':'DM Mono'});t2.textContent=Math.round(v2*100)+'%';svg.appendChild(t2);}}
+  bars.data.forEach((v,i)=>{const x=X(i)-bw/2,y=YB(v);
+    svg.appendChild(el('rect',{x,y,width:bw,height:padT+ih-y,rx:3,fill:bars.color,opacity:.85}));});
+  labels.forEach((l,i)=>{if(labels.length>9&&i%2)return;const tx=el('text',{x:X(i),y:h-9,'text-anchor':'middle','font-size':10,fill:'#8a929a','font-family':'DM Mono'});tx.textContent=l;svg.appendChild(tx);});
+  if(lineActive){
+    const d=line.data.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+YL(v).toFixed(1)).join(' ');
+    svg.appendChild(el('path',{d,fill:'none',stroke:line.color,'stroke-width':2.2,'stroke-linejoin':'round'}));
+    line.data.forEach((v,i)=>svg.appendChild(el('circle',{cx:X(i),cy:YL(v),r:2.4,fill:line.color})));
+  }
+  box.innerHTML='';box.appendChild(svg);
+}
+function donut(box,segs,size=170){
+  const r=size/2,ir=r*0.6,cx=r,cy=r;const total=segs.reduce((a,s)=>a+s.v,0);let ang=-Math.PI/2;
+  const svg=el('svg',{width:size,height:size,viewBox:`0 0 ${size} ${size}`});
+  segs.forEach(s=>{const a2=ang+s.v/total*Math.PI*2;
+    const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+    const xi1=cx+ir*Math.cos(a2),yi1=cy+ir*Math.sin(a2),xi2=cx+ir*Math.cos(ang),yi2=cy+ir*Math.sin(ang);
+    const large=(a2-ang)>Math.PI?1:0;
+    svg.appendChild(el('path',{d:`M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${xi1} ${yi1} A${ir} ${ir} 0 ${large} 0 ${xi2} ${yi2} Z`,fill:s.c}));
+    ang=a2;});
+  box.appendChild(svg);
+}
+function hbar(box,rows,fmtV){
+  const mx=Math.max(...rows.map(r=>r.v));
+  rows.forEach(r=>{const d=document.createElement('div');d.style.cssText='margin:9px 0';
+    d.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>${r.l}</span><b class="mono" style="font-weight:500">${fmtV(r.v)}</b></div>
+    <div style="height:9px;background:#eee9dd;border-radius:6px;overflow:hidden"><div style="height:100%;width:${(r.v/mx*100).toFixed(1)}%;background:${r.c};border-radius:6px"></div></div>`;
+    box.appendChild(d);});
+}
+
+/* ---------- header / footer ---------- */
+const c=DATA.ctx;
+const $id=id=>document.getElementById(id);
+const m_week=$id('m-week'),m_acct=$id('m-acct'),m_fresh=$id('m-fresh'),m_brand=$id('m-brand'),f_ten=$id('f-ten'),f_fresh=$id('f-fresh'),f_chan=$id('f-chan');
+const fmtDate=s=>{const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});};
+const fmtDateY=s=>{const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});};
+const chanLabel=(c.account_type==='Vendor'?'Vendor Central':'Seller Central');
+const weekYear=new Date(c.week_end+'T00:00:00').getFullYear();
+document.title=c.brand+' — Weekly Report';
+if(m_brand){const b=c.branding||{};
+  if(b.logo_data_uri){m_brand.innerHTML='<img src="'+b.logo_data_uri+'" alt="'+c.brand+'" style="max-height:48px;max-width:240px;object-fit:contain">';}
+  else{m_brand.textContent=c.brand;}}
+m_week.textContent='Week of '+fmtDate(c.week_start)+' – '+fmtDate(c.week_end)+', '+weekYear;
+m_acct.innerHTML='Brand <b>'+c.brand+'</b> · '+c.account.replace('@',' · ');
+m_fresh.textContent='Week '+c.week_number+' · '+chanLabel;
+f_ten.textContent=c.tenant;
+if(f_chan) f_chan.textContent='Amazon '+chanLabel+(c.marketplace?(' ('+c.marketplace.replace(/^Amazon\s*/,'')+')'):'');
+f_fresh.textContent=c.sales_fresh_through
+  ? ('Sales & traffic data complete through '+fmtDateY(c.sales_fresh_through)+'.'+(c.ads_fresh_through?(' Advertising data complete through '+fmtDateY(c.ads_fresh_through)+'.'):''))
+  : ('Data complete through '+fmtDateY(c.week_end)+'.');
+
+/* ---------- tabs ---------- */
+const TABS=[['exec','Executive Summary'],['sales','Sales & Traffic'],['ads','Advertising'],['prod','Products & Inventory'],['cust','Customer & LTV'],['rec','Recommended Actions']];
+const bar=document.getElementById('tabbar');
+TABS.forEach(([k,label],i)=>{const b=document.createElement('button');b.className='tab'+(i===0?' active':'');b.textContent=label;
+  b.onclick=()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.dataset.p===k));
+    window.scrollTo({top:0,behavior:'smooth'});requestAnimationFrame(()=>renderCharts(k));};
+  bar.appendChild(b);});
+
+/* ================= EXEC ================= */
+function buildExec(){
+  const p=document.querySelector('[data-p=exec]');const L=DATA.lead;
+  let h=`<div class="card pad lead">
+    <div class="ico">!</div>
+    <div><span class="tag">Lead Story</span><h3>${L.title}</h3><p>${L.detail}</p></div>
+  </div>`;
+  // kpi grid
+  h+='<div class="kpis">';
+  DATA.kpis.forEach((k,idx)=>{
+    const wow=delta(k.cw,k.lw,k.good_up), t4=delta(k.cw,k.t4,k.good_up), yoy=delta(k.cw,k.ly,k.good_up);
+    h+=`<div class="card kpi" data-spk="${idx}">
+      <div class="lab">${k.label}${k.sub?` <span class="sub">· ${k.sub}</span>`:''}</div>
+      <div class="val">${fmt(k.cw,k.fmt)}</div>
+      <div class="cmp">
+        <span>WoW <b class="${wow.c}">${wow.t}</b></span>
+        <span>T4 <b class="${t4.c}">${t4.t}</b></span>
+        <span>YoY <b class="${yoy.c}">${yoy.t}</b></span>
+      </div></div>`;
+  });
+  h+='</div>';
+  // callouts (skip the one promoted to the Lead Story so it isn't shown twice)
+  const rest=DATA.callouts.filter(co=>!(co.title===L.title&&co.detail===L.detail));
+  if(rest.length){
+    h+='<h2 class="sec">What changed this week</h2><div class="callouts">';
+    rest.forEach(co=>{h+=`<div class="co ${co.type}"><div class="h"><span class="dot"></span>${co.title}</div><p>${co.detail}</p></div>`;});
+    h+='</div>';
+  }
+  // trend chart
+  h+=`<h2 class="sec">13-week trend</h2>
+    <div class="card chart-card">
+      <div class="chart-head"><h3 id="exec-ct">Ordered Product Sales</h3>
+        <div class="toggle" id="exec-tog">
+          <button class="on" data-m="ops">Sales</button><button data-m="units">Units</button>
+          <button data-m="sess">Sessions</button><button data-m="spend">Ad Spend</button></div></div>
+      <div id="exec-chart"></div>
+    </div>`;
+  p.innerHTML=h;
+  DATA.kpis.forEach((k,idx)=>{const card=p.querySelector(`[data-spk="${idx}"]`);
+    card.appendChild(sparkline(k.spark,70,26, k.good_up?BP:'#9aa3ab'));});
+  p.querySelectorAll('#exec-tog button').forEach(b=>b.onclick=()=>{
+    p.querySelectorAll('#exec-tog button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    drawExec(b.dataset.m);});
+}
+function drawExec(metric){
+  const labels=DATA.sales.weekly_13w.map(r=>wkLabel(r.wk));
+  const map={ops:{t:'Ordered Product Sales',d:DATA.sales.weekly_13w.map(r=>r.ops),f:fmtK,c:BP},
+    units:{t:'Units Ordered',d:DATA.sales.weekly_13w.map(r=>r.units),f:v=>fmtInt(v),c:BP},
+    sess:{t:'Sessions',d:DATA.traffic.weekly_13w.map(r=>r.sess),f:v=>Math.round(v/1000)+'k',c:BP},
+    spend:{t:'Ad Spend',d:DATA.ads.weekly_13w.map(r=>r.spend),f:fmtK,c:BA}};
+  const m=map[metric];document.getElementById('exec-ct').textContent=m.t;
+  lineChart(document.getElementById('exec-chart'),{series:[{data:m.d,color:m.c,fill:true}],labels,fmtY:m.f});
+}
+
+/* ================= SALES ================= */
+function buildSales(){
+  const p=document.querySelector('[data-p=sales]');const s=DATA.sales.summary;
+  // LY / YTD-LY rows are included only when present (a brand with no prior-year
+  // data omits those keys); the ASP cell guards against units===0 -> em-dash, not $NaN.
+  const rows=[['Current week',s.cw],['Last week',s.lw]];
+  if(s.ly)rows.push(['Last year',s.ly]);
+  rows.push(['Trailing 4-wk total',s.t4],['YTD',s.ytd_cy]);
+  if(s.ytd_ly)rows.push(['YTD last year',s.ytd_ly]);
+  let h=`<h2 class="sec">Sales & Traffic</h2>
+  <p class="sub">YTD sales of ${fmtUsd(s.ytd_cy.ops)} are <b>${DATA.derived.ytd_yoy>=0?'+':''}${DATA.derived.ytd_yoy.toFixed(0)}%</b> vs last year. Current week ${fmtUsd(s.cw.ops)} (${DATA.derived.ops_yoy>=0?'+':''}${DATA.derived.ops_yoy.toFixed(0)}% YoY).</p>
+  <div class="card chart-card"><div class="chart-head"><h3>Ordered Product Sales — 13 weeks</h3></div>
+    <div id="sales-chart"></div>
+    <div class="legend"><span><i style="background:${BP}"></i>Weekly OPS</span><span style="color:#b4453a"><i class="dash"></i>Last-year week</span></div></div>
+  <div class="card chart-card" style="margin-top:16px"><div class="chart-head"><h3>Sessions & Buy Box — 13 weeks</h3></div>
+    <div id="traffic-chart"></div>
+    <div class="legend"><span><i style="background:${BP}"></i>Sessions</span><span style="color:#c2691c"><i style="background:#c2691c"></i>Buy Box %</span></div></div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card pad"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 12px">Period summary</h3>
+      <table><thead><tr><th>Period</th><th>Sales</th><th>Units</th><th>ASP</th></tr></thead><tbody>`;
+  rows.forEach(([l,r])=>{h+=`<tr><td>${l}</td><td class="num">${fmtUsd(r.ops)}</td><td class="num">${fmtInt(r.units)}</td><td class="num">${r.units?fmtUsd2(r.ops/r.units):'\u2014'}</td></tr>`;});
+  h+=`</tbody></table></div>
+    <div class="card chart-card"><div class="chart-head"><h3>Avg Selling Price — 13 weeks</h3></div><div id="asp-chart"></div></div>
+  </div>`;
+  p.innerHTML=h;
+}
+function drawSales(){
+  const sw=DATA.sales.weekly_13w,tw=DATA.traffic.weekly_13w;
+  const lyOps=DATA.sales.summary.ly&&DATA.sales.summary.ly.ops;
+  lineChart(document.getElementById('sales-chart'),{series:[{data:sw.map(r=>r.ops),color:BP,fill:true}],
+    labels:sw.map(r=>wkLabel(r.wk)),fmtY:fmtK,benchmark:lyOps?{value:lyOps,label:'LY',color:'#b4453a'}:null});
+  dualChart(document.getElementById('traffic-chart'),{labels:tw.map(r=>wkLabel(r.wk)),
+    bars:{data:tw.map(r=>r.sess),color:BP},line:{data:tw.map(r=>r.bb),color:'#c2691c'}});
+  lineChart(document.getElementById('asp-chart'),{series:[{data:sw.map(r=>r.ops/r.units),color:'#0b5566',fill:true}],
+    labels:sw.map(r=>wkLabel(r.wk)),fmtY:v=>'$'+v.toFixed(0),height:200});
+}
+
+/* ================= ADS ================= */
+function buildAds(){
+  const p=document.querySelector('[data-p=ads]');const a=DATA.ads;const cw=a.weekly_13w[a.weekly_13w.length-1];
+  const spend=cw.spend,sales=cw.ad_sales,roas=sales/spend,acos=spend/sales*100;
+  const tacos=DATA.derived.tacos_cw,ctr=cw.clicks/cw.impr*100,cpc=spend/cw.clicks,ntb=cw.ntb_sales;
+  const k=(l,v,d='')=>`<div class="card adk"><div class="lab">${l}</div><div class="val">${v}</div>${d?`<div class="d">${d}</div>`:''}</div>`;
+  const adYoY=(a.ly&&a.ly.spend)?((spend/a.ly.spend-1)*100):null;
+  let h=`<h2 class="sec">Advertising</h2>
+  <p class="sub">Current-week ROAS ${roas.toFixed(2)}× at ${acos.toFixed(1)}% ACoS; TACoS ${tacos.toFixed(1)}%.${adYoY!=null?` Spend is ${(adYoY>=0?'+':'')}${adYoY.toFixed(0)}% YoY.`:''}</p>
+  <div class="adkpis">
+    ${k('Ad Spend',fmtUsd(spend))}${k('Ad Sales',fmtUsd(sales))}${k('ROAS',roas.toFixed(2)+'×')}${k('ACoS',acos.toFixed(1)+'%')}
+    ${k('TACoS',tacos.toFixed(1)+'%')}${k('CTR',ctr.toFixed(2)+'%')}${k('Avg CPC',fmtUsd2(cpc))}${k('NTB Ad Sales',fmtUsd(ntb))}
+  </div>
+  <div class="card chart-card" style="margin-top:8px"><div class="chart-head"><h3 id="ads-ct">ROAS — 13 weeks</h3>
+    <div class="toggle" id="ads-tog"><button class="on" data-m="roas">ROAS</button><button data-m="acos">ACoS</button><button data-m="tacos">TACoS</button><button data-m="spend">Spend</button></div></div>
+    <div id="ads-chart"></div></div>
+`;
+  // --- ad detail: portfolio table (hidden when there are no real portfolios), donut, campaign-type table ---
+  const cts=(a.campaign_types_cw||[]);
+  const sentinels=['','(no portfolio)','unassigned','no portfolio','-'];
+  const allPfs=(a.portfolios_cw||[]).map(pf=>Object.assign({},pf,{name:((pf.name||'').trim()||'(no portfolio)')}));
+  const realPfs=allPfs.filter(pf=>!sentinels.includes(pf.name.toLowerCase()));
+  const pfCard = realPfs.length
+    ? `<div class="card pad"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 10px">Portfolio breakdown</h3><table><thead><tr><th>Portfolio</th><th>Spend</th><th>Sales</th><th>ROAS</th><th>ACoS</th></tr></thead><tbody>`
+      + allPfs.map(pf=>`<tr><td>${pf.name}</td><td class="num">${fmtUsd(pf.spend)}</td><td class="num">${fmtUsd(pf.ad_sales)}</td><td class="num">${pf.roas!=null?pf.roas.toFixed(2)+'×':'—'}</td><td class="num">${pf.acos!=null?pf.acos.toFixed(1)+'%':'—'}</td></tr>`).join('')
+      + `</tbody></table></div>`
+    : '';
+  const donutCard = `<div class="card pad" style="text-align:center"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 6px;text-align:left">Spend by campaign type</h3><div id="ad-donut" style="display:flex;justify-content:center;margin:6px 0"></div><div id="ad-donut-leg" style="text-align:left"></div></div>`;
+  h += pfCard ? `<div class="grid-ad" style="margin-top:16px">${pfCard}${donutCard}</div>` : `<div style="margin-top:16px">${donutCard}</div>`;
+  h += `<div class="card pad" style="margin-top:16px"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 10px">Campaign type detail</h3><table><thead><tr><th>Type</th><th>Spend</th><th>Sales</th><th>Orders</th><th>ROAS</th><th>ACoS</th><th>CTR</th></tr></thead><tbody>`
+    + cts.map(t=>`<tr><td>${t.type}</td><td class="num">${fmtUsd(t.spend)}</td><td class="num">${fmtUsd(t.ad_sales)}</td><td class="num">${fmtInt(t.orders)}</td><td class="num">${t.roas!=null?t.roas.toFixed(2)+'×':'—'}</td><td class="num">${t.acos!=null?t.acos.toFixed(1)+'%':'—'}</td><td class="num">${t.ctr!=null?t.ctr.toFixed(2)+'%':'—'}</td></tr>`).join('')
+    + `</tbody></table></div>`;
+  p.innerHTML=h;
+  p.querySelectorAll('#ads-tog button').forEach(b=>b.onclick=()=>{p.querySelectorAll('#ads-tog button').forEach(x=>x.classList.remove('on'));b.classList.add('on');drawAdsLine(b.dataset.m);});
+}
+function drawAds(){
+  drawAdsLine('roas');
+  const a=DATA.ads;const segs=(a.campaign_types_cw||[]).map((t,i)=>({l:t.type,v:t.spend,c:i?BA:BP}));
+  const dn=document.getElementById('ad-donut');if(dn){dn.innerHTML='';donut(dn,segs.map(s=>({v:s.v,c:s.c})),168);}
+  const total=segs.reduce((x,s)=>x+s.v,0)||1;
+  const leg=document.getElementById('ad-donut-leg');if(leg)leg.innerHTML=segs.map(s=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;margin:5px 0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${s.c};margin-right:7px"></i>${s.l}</span><b class="mono" style="font-weight:500">${(s.v/total*100).toFixed(0)}%</b></div>`).join('');
+}
+function drawAdsLine(metric){
+  const w=DATA.ads.weekly_13w,labels=w.map(r=>wkLabel(r.wk));
+  const sales=DATA.sales.weekly_13w;
+  const map={roas:{t:'ROAS — 13 weeks',d:w.map(r=>r.ad_sales/r.spend),f:v=>v.toFixed(1)+'×',c:BP},
+    acos:{t:'ACoS — 13 weeks',d:w.map(r=>r.spend/r.ad_sales*100),f:v=>v.toFixed(0)+'%',c:'#c2691c'},
+    tacos:{t:'TACoS — 13 weeks',d:w.map((r,i)=>r.spend/sales[i].ops*100),f:v=>v.toFixed(0)+'%',c:'#b4453a'},
+    spend:{t:'Ad Spend — 13 weeks',d:w.map(r=>r.spend),f:fmtK,c:BA}};
+  const m=map[metric];document.getElementById('ads-ct').textContent=m.t;
+  lineChart(document.getElementById('ads-chart'),{series:[{data:m.d,color:m.c,fill:true}],labels,fmtY:m.f});
+}
+
+/* ================= PRODUCTS ================= */
+let prodSort={k:'cw_ops',dir:-1};
+function buildProd(){
+  const p=document.querySelector('[data-p=prod]');
+  let h=`<h2 class="sec">Products & Inventory</h2><p class="sub">Top 15 ASINs by current-week sales. Tags flag Buy Box loss, stockout risk (under ~4 weeks of cover), and week-over-week surges.</p>
+  <div class="card pad"><div style="overflow-x:auto"><table id="prod-tbl"><thead><tr>
+  <th class="sortable" data-k="name">Product</th>
+  <th class="sortable" data-k="cw_ops">Sales (CW)</th>
+  <th class="sortable" data-k="wow">WoW</th>
+  <th class="sortable" data-k="cw_units">Units</th>
+  <th class="sortable" data-k="ly_ops">YoY</th>
+  <th class="sortable" data-k="oh">On hand</th>
+  <th class="sortable" data-k="woc">Wks cover</th>
+  <th class="sortable" data-k="bb_cw">Buy Box</th>
+  </tr></thead><tbody></tbody></table></div></div>`;
+  p.innerHTML=h;
+  p.querySelectorAll('th.sortable').forEach(th=>th.onclick=()=>{const k=th.dataset.k;
+    prodSort.dir=prodSort.k===k?-prodSort.dir:-1;prodSort.k=k;drawProd();});
+  drawProd();
+}
+function drawProd(){
+  const rows=DATA.asins.map(a=>{const vel=a.t4_units/4;return {...a,
+    wow:a.lw_ops?(a.cw_ops/a.lw_ops-1)*100:0, yoy:a.ly_ops?(a.cw_ops/a.ly_ops-1)*100:null,
+    woc:vel?a.oh/vel:99};});
+  const k=prodSort.k;rows.sort((x,y)=>{let xv=x[k],yv=y[k];if(xv==null)xv=-1;if(yv==null)yv=-1;return (xv>yv?1:xv<yv?-1:0)*prodSort.dir;});
+  const tb=document.querySelector('#prod-tbl tbody');tb.innerHTML='';
+  rows.forEach(a=>{const tags=[];
+    if((a.bb_cw||1)<0.85)tags.push('<span class="pill lowbb">Low BB</span>');
+    if(a.woc<4)tags.push('<span class="pill oos">OOS risk</span>');
+    if(a.wow>=12)tags.push('<span class="pill surge">Surge</span>');
+    const yoy=a.yoy==null?'—':`<b class="${a.yoy>=0?'up':'dn'}">${a.yoy>=0?'+':''}${a.yoy.toFixed(0)}%</b>`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${a.name}${tags.join('')}<span class="asin-sub">${a.asin}</span></td>
+      <td class="num">${fmtUsd(a.cw_ops)}</td>
+      <td class="num"><span class="${a.wow>=0?'up':'dn'}">${a.wow>=0?'+':''}${a.wow.toFixed(0)}%</span></td>
+      <td class="num">${fmtInt(a.cw_units)}</td>
+      <td class="num">${yoy}</td>
+      <td class="num">${fmtInt(a.oh)}</td>
+      <td class="num" style="${a.woc<4?'color:var(--warn);font-weight:600':''}">${a.woc>=99?'—':a.woc.toFixed(1)}</td>
+      <td class="num" style="${(a.bb_cw||1)<0.85?'color:var(--danger);font-weight:600':''}">${a.bb_cw!=null?(a.bb_cw*100).toFixed(0)+'%':'—'}</td>`;
+    tb.appendChild(tr);});
+}
+
+/* ================= CUSTOMER ================= */
+function buildCust(){
+  const p=document.querySelector('[data-p=cust]');
+  const cust=DATA.cust||{},n=cust.ntb,l=cust.ltv;
+  const hasLtv=!!(c.has_ltv && n && n.cw && l);
+  const hasCoupons=!!(c.has_coupons && Array.isArray(DATA.coupons) && DATA.coupons.length);
+
+  // ---- canonical no-LTV empty state (one fixed message, identical every run) ----
+  if(!hasLtv){
+    let h=`<h2 class="sec">Customer & LTV</h2>
+    <div class="card pad"><p class="sub" style="margin:0">Customer and lifetime-value data is not available for this account, so this section is empty. Vendor Central accounts typically do not report new-to-brand or repeat-buyer detail.</p></div>`;
+    if(hasCoupons){
+      h+=`<div class="card pad" style="margin-top:16px"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 10px">Recent coupons</h3>
+      <table><thead><tr><th>Coupon</th><th>Clips</th><th>Redemptions</th><th>Sales</th><th>Discount</th><th>Budget used</th></tr></thead><tbody>`;
+      DATA.coupons.forEach(co=>{h+=`<tr><td>${co.name}</td><td class="num">${fmtInt(co.clips)}</td><td class="num">${fmtInt(co.redemptions)}</td><td class="num">${fmtUsd(co.sales)}</td><td class="num">${fmtUsd(co.discount)}</td><td class="num">${(co.budget_pct||0).toFixed(1)}%</td></tr>`;});
+      h+=`</tbody></table></div>`;
+    }
+    p.innerHTML=h;
+    return;
+  }
+
+  // ---- full render (LTV present); every division guarded ----
+  const cwTot=n.cw.existing_orders+n.cw.ntb_orders+n.cw.unknown_orders;
+  const ntbShare=cwTot?n.cw.ntb_orders/cwTot*100:0;
+  const repTot=(l.repeat_buyers||0)+(l.onetime_buyers||0);
+  const repShare=repTot?l.repeat_buyers/repTot*100:0;
+  const ltvRatio=l.onetime_avg_ltv?l.repeat_avg_ltv/l.onetime_avg_ltv:0;
+  let h=`<h2 class="sec">Customer & LTV</h2>
+  <p class="sub">New-to-brand customers drove <b>${ntbShare.toFixed(0)}%</b> of orders this week. Repeat buyers are worth <b>${fmtUsd2(l.repeat_avg_ltv)}</b> in lifetime sales vs ${fmtUsd2(l.onetime_avg_ltv)} for one-time buyers.</p>
+  <div class="card pad"><div class="stat-row">
+    <div class="bigstat"><div class="n" style="color:var(--primary)">${ntbShare.toFixed(0)}%</div><div class="l">New-to-brand share of weekly orders</div></div>
+    <div class="bigstat"><div class="n">${fmtUsd(n.cw.ntb_rev)}</div><div class="l">New-to-brand revenue this week</div></div>
+    <div class="bigstat"><div class="n">${repShare.toFixed(0)}%</div><div class="l">Customers who are repeat buyers</div></div>
+  </div></div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card pad"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 12px">New-to-brand vs existing — orders</h3><div id="ntb-bars"></div></div>
+    <div class="card pad"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 12px">Lifetime value by buyer type</h3><div id="ltv-bars"></div>
+      <div class="note" style="margin-top:14px">Repeat buyers represent ${fmtInt(l.repeat_buyers)} customers and ${fmtUsd(l.repeat_rev)} of lifetime sales — a ${ltvRatio.toFixed(1)}× higher average value than one-time buyers.</div>
+    </div>
+  </div>
+  <div class="card pad" style="margin-top:16px"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 10px">New-to-brand orders & revenue by period</h3>
+    <table><thead><tr><th>Period</th><th>NTB orders</th><th>NTB revenue</th><th>Existing orders</th><th>Existing revenue</th><th>NTB share</th></tr></thead><tbody>`;
+  [['Current week','cw'],['Last week','lw'],['Last year','ly'],['Year to date','ytd']].forEach(([lab,key])=>{
+    const d=n[key];if(!d)return;const tot=d.existing_orders+d.ntb_orders+d.unknown_orders;
+    h+=`<tr><td>${lab}</td><td class="num">${fmtInt(d.ntb_orders)}</td><td class="num">${fmtUsd(d.ntb_rev)}</td><td class="num">${fmtInt(d.existing_orders)}</td><td class="num">${fmtUsd(d.existing_rev)}</td><td class="num">${(tot?d.ntb_orders/tot*100:0).toFixed(0)}%</td></tr>`;});
+  h+=`</tbody></table></div>`;
+  if(hasCoupons){
+    h+=`<div class="card pad" style="margin-top:16px"><h3 style="font-family:Fraunces;font-size:16px;margin:0 0 10px">Recent coupons</h3>
+    <table><thead><tr><th>Coupon</th><th>Clips</th><th>Redemptions</th><th>Sales</th><th>Discount</th><th>Budget used</th></tr></thead><tbody>`;
+    DATA.coupons.forEach(co=>{h+=`<tr><td>${co.name}</td><td class="num">${fmtInt(co.clips)}</td><td class="num">${fmtInt(co.redemptions)}</td><td class="num">${fmtUsd(co.sales)}</td><td class="num">${fmtUsd(co.discount)}</td><td class="num">${(co.budget_pct||0).toFixed(1)}%</td></tr>`;});
+    h+=`</tbody></table></div>`;
+  }
+  p.innerHTML=h;
+  hbar(document.getElementById('ntb-bars'),[
+    {l:'New to brand',v:n.cw.ntb_orders,c:BP},
+    {l:'Existing',v:n.cw.existing_orders,c:BA},
+    {l:'Unknown',v:n.cw.unknown_orders,c:'#c9c2b3'}],fmtInt);
+  hbar(document.getElementById('ltv-bars'),[
+    {l:'Repeat buyers (avg LTV)',v:l.repeat_avg_ltv,c:BP},
+    {l:'One-time buyers (avg LTV)',v:l.onetime_avg_ltv,c:BA}],fmtUsd2);
+}
+
+/* ================= RECS ================= */
+function buildRec(){
+  const p=document.querySelector('[data-p=rec]');
+  const order={High:0,Medium:1,Low:2};const recs=[...DATA.recs].sort((a,b)=>order[a.pri]-order[b.pri]);
+  let h=`<h2 class="sec">Recommended Actions</h2><p class="sub">${recs.filter(r=>r.pri==='High').length} high-priority, ${recs.filter(r=>r.pri==='Medium').length} medium, ${recs.filter(r=>r.pri==='Low').length} low. Prioritized from this week's operational flags and trends.</p><div class="card">`;
+  recs.forEach(r=>{h+=`<div class="rec"><div class="pri"><span class="rbadge ${r.pri}">${r.pri}</span></div><div><h4>${r.title}</h4><p>${r.body}</p></div></div>`;});
+  h+=`</div><div class="note" style="margin-top:18px"><b>Data note.</b> ${f_fresh.textContent} This report is anchored to the week ending ${fmtDateY(c.week_end)} so that sales, traffic, and advertising all reflect complete data.</div>`;
+  p.innerHTML=h;
+}
+
+/* ---------- render orchestration ---------- */
+const built={};
+function renderCharts(k){
+  if(k==='exec')drawExec('ops');
+  if(k==='sales')drawSales();
+  if(k==='ads')drawAds();
+}
+buildExec();buildSales();buildAds();buildProd();buildCust();buildRec();
+drawExec('ops');
+window.addEventListener('resize',()=>{const active=document.querySelector('.tab.active').textContent;
+  const k=TABS.find(t=>t[1]===active)[0];renderCharts(k);});
+</script>
+</body>
+</html>

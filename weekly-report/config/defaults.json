@@ -1,0 +1,41 @@
+{
+  "_comment": "Default thresholds for the Weekly Report callout + recommendation engine. Override per-brand via --config with the same schema (deep-merged over these).",
+
+  "buy_box": {
+    "low_bb_threshold": 0.85,
+    "_low_bb_threshold": "Flag an ASIN's Buy Box as 'lost' below this share (0-1). Raise toward 0.9 for brands that should always own the box.",
+    "max_callouts": 2
+  },
+
+  "inventory": {
+    "weeks_of_cover_warning": 4,
+    "_weeks_of_cover_warning": "Flag OOS risk when on-hand / (T4 weekly velocity) is below this many weeks.",
+    "min_weekly_ops_for_oos_flag": 1500,
+    "_min_weekly_ops_for_oos_flag": "Only raise an OOS callout for ASINs above this weekly OPS — avoids noise from long-tail SKUs.",
+    "max_callouts": 2
+  },
+
+  "statistical": {
+    "z_threshold": 1.5,
+    "_z_threshold": "Weekly metric is called out when |z| vs the trailing 12-week mean exceeds this. Raise to 2.0 for highly seasonal brands."
+  },
+
+  "advertising": {
+    "roas_warning_threshold": 1.5,
+    "_roas_warning_threshold": "ROAS below this is treated as a warning in callouts/recs.",
+    "portfolio_scale_roas": 10,
+    "_portfolio_scale_roas": "Recommend scaling a non-default portfolio when its ROAS exceeds this."
+  },
+
+  "pricing": {
+    "asp_yoy_callout_pct": 5,
+    "_asp_yoy_callout_pct": "Call out ASP movement when |YoY %| exceeds this."
+  },
+
+  "display": {
+    "top_asins_count": 15,
+    "_top_asins_count": "How many ASINs the Products table shows. Lower to 8-10 for thin catalogs.",
+    "asin_name_maxlen": 40,
+    "_asin_name_maxlen": "Cap (chars) for the deterministic ASIN label produced by clean_name() at load."
+  }
+}
