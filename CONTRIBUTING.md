@@ -48,41 +48,50 @@ Requirements:
 
 ## How to add a skill in your browser (no git required)
 
+This is done entirely in your browser with no git, and you do not need any
+special access. You make your own copy of the kstack (called a "fork"), add your
+skill to it, and then open a pull request asking us to pull it into the real
+kstack.
+
 1. Go to https://github.com/therealkapoq/kstack
-2. Click the branch dropdown near the top-left (it says `main`), type a new
-   branch name like `add-your-skill-name`, and click
-   "Create branch: add-your-skill-name from main".
-3. Make sure the dropdown now shows your new branch, not `main`.
+2. Click the "Fork" button near the top-right, then click "Create fork". GitHub
+   makes your own copy at `github.com/your-username/kstack` and sends you there.
+3. Make sure the top-left of the page now shows `your-username/kstack`, not
+   `therealkapoq/kstack`. Everything below happens in your copy.
 4. Click the "Add file" button (top-right of the file list), then
    "Upload files".
 5. Drag your entire skill folder into the upload box. GitHub preserves the
    folder structure, so your files land inside a folder named after your skill.
-6. Scroll to "Commit changes", leave "Commit directly to the add-... branch"
+6. Scroll to "Commit changes", leave "Commit directly to the `main` branch"
    selected, enter a short message like "Add your-skill-name skill", and click
    "Commit changes".
-7. A green "Compare & pull request" button appears. Click it. (No button? Open
-   the "Pull requests" tab, then "New pull request".)
-8. Confirm the page reads base: `main` and compare: `add-...`, add a title and a
-   one-sentence description of what your skill does, then click
+7. Go back to the top page of your fork. A banner appears saying your branch is
+   "1 commit ahead". Click the "Contribute" button in that banner, then
+   "Open pull request". (No banner? Open the "Pull requests" tab, then
+   "New pull request".)
+8. Confirm the page reads base repository: `therealkapoq/kstack` base: `main`,
+   and head repository: `your-username/kstack` compare: `main`. Add a title and
+   a one-sentence description of what your skill does, then click
    "Create pull request".
 
 That's it. A maintainer will review your pull request and merge it.
 
 ## Making changes after you open a pull request
 
-You do not open a new pull request to make changes. Just commit again to the
-same `add-...` branch and your open pull request updates automatically.
+You do not open a new pull request to make changes. Just commit again to your
+fork's `main` branch and your open pull request updates automatically.
 
-The one rule: before you commit any change, make sure the branch dropdown shows
-your `add-...` branch, not `main`.
+The one rule: before you commit any change, make sure you are in your own copy.
+The top-left of the page should read `your-username/kstack`, not
+`therealkapoq/kstack`.
 
 - Edit an existing file: open the file, click the pencil icon (top-right of the
-  file view), make your changes, then "Commit changes" to the `add-...` branch.
-- Add more files: "Add file" then "Upload files" (or "Create new file"), commit
-  to the `add-...` branch.
-- Delete a file: open the file, click the trash-can icon, commit to the branch.
+  file view), make your changes, then "Commit changes".
+- Add more files: "Add file" then "Upload files" (or "Create new file"), then
+  commit.
+- Delete a file: open the file, click the trash-can icon, then commit.
 - Rename or move a file: open the file, click the pencil icon, edit the filename
-  at the top (include a `/` to move it into a folder), commit.
+  at the top (include a `/` to move it into a folder), then commit.
 
 If a maintainer leaves review comments, fix them the same way and the changes
 land in the same pull request. When a maintainer uses GitHub's "Suggest changes"
