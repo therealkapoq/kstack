@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<!--
+  daily-brand-check — live brand dashboard
+  Five tabs (Brand Overview, Advertising, ASIN / Product, Search Terms,
+  Inventory Health) rendered from Kapoq Datalink, anchored to the brand's
+  latest data. Generated from the daily-brand-check skill; build steps and
+  the CONFIG-constant checklist live in SKILL.md (Step 5).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Brand Check</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridjs@5.0.2/dist/theme/mermaid.min.css" integrity="sha384-jZvDSsmGB9oGGT/4l9bHXGoAv1OxvG/cFmSo0dZaSqmBgvQTKDBFAMftlXTmMbNW" crossorigin="anonymous" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/gridjs@5.0.2/dist/gridjs.umd.js" integrity="sha384-/XXDzxe4FsGiAe50i/u9pY/Vy/uX654MHB1xoc1BJNnH1WXHhqHga9g3q5tF4gj7" crossorigin="anonymous"></script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --ink: #1f2733;
+    --muted: #687385;
+    --line: #e3e7ee;
+    --primary: #0066ff;
+    --pos: #11865a;
+    --neg: #c83b3b;
+    --warn: #b8860b;
+    --shadow: 0 1px 3px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.04);
+    --radius: 12px;
+    font-synthesis: none;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.45;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; background: var(--card); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header .brand { font-size: 17px; font-weight: 650; letter-spacing: -.01em; }
+  header .asof { color: var(--muted); font-size: 12px; margin-left: 10px; }
+  header button {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 550; cursor: pointer;
+  }
+  header button:hover { border-color: var(--primary); color: var(--primary); }
+  header button:disabled { opacity: .5; cursor: default; }
+  nav { display: flex; gap: 2px; padding: 0 14px; background: var(--card); border-bottom: 1px solid var(--line); overflow-x: auto; }
+  nav button {
+    border: none; background: none; color: var(--muted); cursor: pointer;
+    padding: 12px 14px; font-size: 13.5px; font-weight: 550; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
+  main { padding: 18px 20px 60px; max-width: 1180px; margin: 0 auto; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+  .grid { display: grid; gap: 14px; }
+  .kpis { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); margin-bottom: 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+  .kpi .label { color: var(--muted); font-size: 12px; font-weight: 550; text-transform: uppercase; letter-spacing: .03em; }
+  .kpi .value { font-size: 23px; font-weight: 680; letter-spacing: -.02em; margin-top: 4px; }
+  .kpi .deltas { display: flex; gap: 12px; margin-top: 8px; font-size: 12px; }
+  .kpi .delta .d-label { color: var(--muted); }
+  .delta.pos { color: var(--pos); } .delta.neg { color: var(--neg); } .delta.flat { color: var(--muted); }
+  .section-title { font-size: 14px; font-weight: 650; margin: 22px 0 10px; }
+  .chart-wrap { position: relative; height: 300px; }
+  .skeleton { background: linear-gradient(90deg,#eef1f5 25%,#e3e7ee 37%,#eef1f5 63%); background-size: 400% 100%; animation: shimmer 1.3s ease infinite; border-radius: 8px; }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+  .sk-card { height: 96px; } .sk-chart { height: 300px; } .sk-table { height: 220px; }
+  .muted { color: var(--muted); }
+  .err { color: var(--neg); font-size: 13px; padding: 10px 0; }
+  .gridjs-wrapper { box-shadow: none !important; }
+  table.gridjs-table { font-size: 13px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; }
+  .tag.risk { background: #fdeaea; color: var(--neg); } .tag.slow { background: #fff5e0; color: var(--warn); }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="brand" id="brandName"></span><span class="asof" id="asOf"></span></div>
+  <button id="reloadBtn" onclick="reloadAll()">↻ Reload</button>
+</header>
+<nav id="tabnav"></nav>
+<main>
+  <section class="tab" data-tab="overview"></section>
+  <section class="tab" data-tab="advertising"></section>
+  <section class="tab" data-tab="asin"></section>
+  <section class="tab" data-tab="search"></section>
+  <section class="tab" data-tab="inventory"></section>
+</main>
+
+<script>
+/* ============================== CONFIG ============================== */
+const BRAND         = "__BRAND__";
+const MCP_TOOL_NAME = "__MCP_TOOL_NAME__";   // exact fully-qualified tool name
+const LATEST_DATE   = "__LATEST_DATE__";     // YYYY-MM-DD, anchors sales windows
+const AD_LATEST_DATE= "__AD_LATEST_DATE__";  // YYYY-MM-DD, anchors ad windows (usually lags)
+const IS_SELLER     = __IS_SELLER__;
+const IS_VENDOR     = __IS_VENDOR__;
+
+const TABS = [
+  { id: "overview",    name: "Brand Overview" },
+  { id: "advertising", name: "Advertising" },
+  { id: "asin",        name: "ASIN / Product" },
+  { id: "search",      name: "Search Terms" },
+  { id: "inventory",   name: "Inventory Health" },
+];
+
+/* ===================== DATE WINDOWS (from LATEST) ==================== */
+function isoShift(iso, days) {
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+function windows(latest) {
+  return {
+    CUR_START: isoShift(latest, -29), CUR_END: latest,
+    PRI_START: isoShift(latest, -59), PRI_END: isoShift(latest, -30),
+    YOY_START: isoShift(latest, -394), YOY_END: isoShift(latest, -365),
+  };
+}
+let LATEST = LATEST_DATE;
+let AD_LATEST = AD_LATEST_DATE;
+let W = windows(LATEST);     // sales/traffic/inventory windows
+let WA = windows(AD_LATEST); // advertising windows (own anchor; usually lags)
+
+function fill(sql) {
+  return sql
+    .replaceAll("{BRAND}", BRAND)
+    .replaceAll("{CUR_START}", W.CUR_START).replaceAll("{CUR_END}", W.CUR_END)
+    .replaceAll("{PRI_START}", W.PRI_START).replaceAll("{PRI_END}", W.PRI_END)
+    .replaceAll("{YOY_START}", W.YOY_START).replaceAll("{YOY_END}", W.YOY_END)
+    .replaceAll("{AD_CUR_START}", WA.CUR_START).replaceAll("{AD_CUR_END}", WA.CUR_END)
+    .replaceAll("{AD_PRI_START}", WA.PRI_START).replaceAll("{AD_PRI_END}", WA.PRI_END)
+    .replaceAll("{AD_YOY_START}", WA.YOY_START).replaceAll("{AD_YOY_END}", WA.YOY_END);
+}
+function asOfText() {
+  return AD_LATEST && AD_LATEST !== LATEST
+    ? "· sales through " + LATEST + " · ads through " + AD_LATEST
+    : "· data through " + LATEST;
+}
+
+/* ========================= QUERY + CACHE ============================ */
+const _cache = new Map();
+async function runQuery(sql, { fresh = false } = {}) {
+  const key = sql.trim();
+  if (!fresh && _cache.has(key)) return _cache.get(key);
+  const res = await window.cowork.callMcpTool(MCP_TOOL_NAME, { sql: key });
+  // Tenants wrap results differently — normalize to a rows array.
+  const rows = normalizeRows(res);
+  // No rows can mean a real error OR a truncated/unparseable payload that
+  // normalizeRows silently swallowed to []. Surface it so the tab shows a
+  // message instead of a blank table. (Keep table queries small — the tool
+  // bridge truncates large results; the shipped table queries cap at 25 rows.)
+  if (!rows.length) {
+    const err = extractError(res);
+    if (err) throw new Error(err);
+  }
+  _cache.set(key, rows);
+  return rows;
+}
+function extractError(res) {
+  try {
+    let r = res;
+    if (r && typeof r.result === "string") r = JSON.parse(r.result);
+    else if (r && r.result != null) r = r.result;
+    else if (typeof r === "string") r = JSON.parse(r);
+    if (r && r.error) return String(r.error);
+    return null; // legitimately empty result set
+  } catch (e) {
+    return "Unparseable response from the data tool (the result may be too large and was truncated).";
+  }
+}
+function normalizeRows(res) {
+  if (!res) return [];
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res.rows)) return res.rows;
+  if (Array.isArray(res.data)) return res.data;
+  // Kapoq Datalink wraps the payload as { result: "<json string>" } (or a nested
+  // object); unwrap and recurse so the .rows branch above catches the parsed rows.
+  // Without this branch every tab silently renders blank against Kapoq tenants.
+  if (res.result != null) {
+    if (typeof res.result === "string") { try { return normalizeRows(JSON.parse(res.result)); } catch { return []; } }
+    return normalizeRows(res.result);
+  }
+  if (typeof res === "string") { try { return normalizeRows(JSON.parse(res)); } catch { return []; } }
+  if (res.content && Array.isArray(res.content)) {
+    const txt = res.content.map(c => c.text || "").join("");
+    try { return normalizeRows(JSON.parse(txt)); } catch { return []; }
+  }
+  return [];
+}
+
+/* ========================= FORMAT HELPERS ========================== */
+// CampaignType comes back as full strings ("Sponsored Product", "Sponsored Brand", ...)
+// and varies by tenant; normalize to short codes. Passthrough for anything unmapped.
+function normType(t) {
+  const m = {
+    "Sponsored Product": "SP", "Sponsored Products": "SP",
+    "Sponsored Brand": "SB", "Sponsored Brands": "SB",
+    "Sponsored Brands Video": "SBV", "Sponsored Display": "SD",
+  };
+  return m[t] || t || "";
+}
+const fmt = {
+  usd:  v => v == null ? "—" : "$" + Math.round(+v).toLocaleString(),
+  usd2: v => v == null ? "—" : "$" + (+v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+  int:  v => v == null ? "—" : Math.round(+v).toLocaleString(),
+  pct:  v => v == null ? "—" : (+v).toFixed(1) + "%",
+  x:    v => v == null ? "—" : (+v).toFixed(2) + "x",
+};
+function pctDelta(cur, base) {
+  if (base == null || base === 0 || cur == null) return null;
+  return (cur - base) / Math.abs(base) * 100;
+}
+function deltaSpan(label, cur, base, higherIsBetter = true) {
+  const d = pctDelta(cur, base);
+  if (d == null) return `<span class="delta flat"><span class="d-label">${label}</span> —</span>`;
+  const good = higherIsBetter ? d >= 0 : d <= 0;
+  const cls = Math.abs(d) < 0.05 ? "flat" : good ? "pos" : "neg";
+  const sign = d >= 0 ? "+" : "";
+  return `<span class="delta ${cls}"><span class="d-label">${label}</span> ${sign}${d.toFixed(1)}%</span>`;
+}
+
+/* ========================= UI HELPERS ============================== */
+function kpiCard(label, current, prior, yoy, format = "int", higherIsBetter = true) {
+  const f = fmt[format] || fmt.int;
+  return `<div class="card kpi">
+    <div class="label">${label}</div>
+    <div class="value">${f(current)}</div>
+    <div class="deltas">
+      ${deltaSpan("vs prior", current, prior, higherIsBetter)}
+      ${deltaSpan("YoY", current, yoy, higherIsBetter)}
+    </div>
+  </div>`;
+}
+function renderChart(canvas, config) {
+  if (canvas._chart) canvas._chart.destroy();
+  canvas._chart = new Chart(canvas, config);
+  return canvas._chart;
+}
+function renderTable(container, columns, rows) {
+  container.innerHTML = "";
+  new gridjs.Grid({
+    columns, data: rows, sort: true, search: rows.length > 12,
+    pagination: rows.length > 25 ? { limit: 25 } : false,
+    style: { th: { padding: "8px 10px" }, td: { padding: "7px 10px" } },
+  }).render(container);
+}
+const el = (tab) => document.querySelector(`.tab[data-tab="${tab}"]`);
+function skeleton(tab, kind = "card", n = 4) {
+  const cls = kind === "chart" ? "sk-chart" : kind === "table" ? "sk-table" : "sk-card";
+  el(tab).innerHTML = `<div class="grid kpis">` +
+    Array.from({ length: n }, () => `<div class="skeleton ${cls}"></div>`).join("") + `</div>`;
+}
+function errorBox(tab, msg) { el(tab).innerHTML = `<div class="err">Couldn't load this tab: ${msg}</div>`; }
+
+/* ===================== TAB LOADERS (fill these) ===================== */
+/* Each loader: paste the matching query from references/queries.md into the
+   runQuery(fill(`...`)) call, then map rows to the helpers. The first two are
+   wired as worked examples; mirror the pattern for the rest. */
+
+async function loadOverview() {
+  skeleton("overview", "card", 8);
+  try {
+    // --- 1A sales KPIs ---
+    const salesRows = await runQuery(fill(`PASTE QUERY 1A (sales KPIs) HERE`));
+    const S = Object.fromEntries(salesRows.map(r => [r.src, r]));
+    // --- 1B ad KPIs ---
+    const adRows = await runQuery(fill(`PASTE QUERY 1B (ad KPIs) HERE`));
+    const A = Object.fromEntries(adRows.map(r => [r.src, r]));
+
+    const cards = [
+      kpiCard("Sales", S.cur?.sales, S.pri?.sales, S.yoy?.sales, "usd"),
+      kpiCard("Units", S.cur?.units, S.pri?.units, S.yoy?.units, "int"),
+      kpiCard("Ad Spend", A.cur?.spend, A.pri?.spend, A.yoy?.spend, "usd"),
+      kpiCard("Ad Sales", A.cur?.ad_sales, A.pri?.ad_sales, A.yoy?.ad_sales, "usd"),
+      kpiCard("ACoS", A.cur?.acos, A.pri?.acos, A.yoy?.acos, "pct", false),
+      kpiCard("TACoS", A.cur?.tacos, A.pri?.tacos, A.yoy?.tacos, "pct", false),
+      kpiCard("ROAS", A.cur?.roas, A.pri?.roas, A.yoy?.roas, "x"),
+      kpiCard("CTR", A.cur?.ctr, A.pri?.ctr, A.yoy?.ctr, "pct"),
+    ];
+    el("overview").innerHTML =
+      `<div class="grid kpis">${cards.join("")}</div>
+       <div class="section-title">Daily sales &amp; ad spend (last 30 days)</div>
+       <div class="card"><div class="chart-wrap"><canvas id="ovChart"></canvas></div></div>
+       <div class="section-title">Top 10 ASINs by sales</div>
+       <div class="card"><div id="ovTopAsins"></div></div>`;
+
+    // --- 1C trend chart ---
+    const trend = await runQuery(fill(`PASTE QUERY 1C (daily trend) HERE`));
+    renderChart(document.getElementById("ovChart"), {
+      type: "line",
+      data: {
+        labels: trend.map(r => r.day),
+        datasets: [
+          { label: "Sales", data: trend.map(r => +r.sales || 0), borderColor: "var(--primary)", tension: .3, yAxisID: "y" },
+          { label: "Ad Spend", data: trend.map(r => +r.spend || 0), borderColor: "#b8860b", tension: .3, yAxisID: "y" },
+        ],
+      },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false } },
+    });
+
+    // --- top ASINs ---
+    const top = await runQuery(fill(`PASTE QUERY 1D seller / 1D-V vendor (top 10 ASINs) HERE`));
+    renderTable(document.getElementById("ovTopAsins"),
+      [{ name: "ASIN", id: "asin" }, { name: "Product", id: "name" },
+       { name: "Sales", id: "sales", formatter: c => fmt.usd(c) },
+       { name: "Units", id: "units", formatter: c => fmt.int(c) }],
+      top.map(r => ({ asin: r.asin, name: (r.name || "").slice(0, 30), sales: r.sales, units: r.units })));
+  } catch (e) { errorBox("overview", e.message); }
+}
+
+async function loadAdvertising() {
+  skeleton("advertising", "card", 4);
+  try {
+    const types = await runQuery(fill(`PASTE QUERY 2A (campaign type) HERE`));
+    el("advertising").innerHTML =
+      `<div class="section-title">By campaign type (last 30 days)</div>
+       <div class="card"><div id="adTypes"></div></div>
+       <div class="section-title">Daily ad spend vs ad sales</div>
+       <div class="card"><div class="chart-wrap"><canvas id="adChart"></canvas></div></div>
+       <div class="section-title">Campaigns (top 25 by spend)</div>
+       <div class="card"><div id="adCampaigns"></div></div>`;
+
+    renderTable(document.getElementById("adTypes"),
+      [{ name: "Type", id: "type", formatter: c => normType(c) },
+       { name: "Spend", id: "spend", formatter: c => fmt.usd(c) },
+       { name: "Ad Sales", id: "ad_sales", formatter: c => fmt.usd(c) },
+       { name: "ROAS", id: "roas", formatter: c => fmt.x(c) },
+       { name: "ACoS", id: "acos", formatter: c => fmt.pct(c) },
+       { name: "CTR", id: "ctr", formatter: c => fmt.pct(c) }],
+      types);
+
+    const trend = await runQuery(fill(`PASTE QUERY 2C (daily ad trend) HERE`));
+    renderChart(document.getElementById("adChart"), {
+      type: "line",
+      data: { labels: trend.map(r => r.day), datasets: [
+        { label: "Spend", data: trend.map(r => +r.spend || 0), borderColor: "#b8860b", tension: .3 },
+        { label: "Ad Sales", data: trend.map(r => +r.ad_sales || 0), borderColor: "var(--primary)", tension: .3 }] },
+      options: { responsive: true, maintainAspectRatio: false },
+    });
+
+    const camps = await runQuery(fill(`PASTE QUERY 2B (per-campaign) HERE`));
+    renderTable(document.getElementById("adCampaigns"),
+      [{ name: "Campaign", id: "name" }, { name: "Type", id: "type", formatter: c => normType(c) },
+       { name: "Spend", id: "spend", formatter: c => fmt.usd(c) },
+       { name: "Ad Sales", id: "ad_sales", formatter: c => fmt.usd(c) },
+       { name: "ROAS", id: "roas", formatter: c => fmt.x(c) },
+       { name: "ACoS", id: "acos", formatter: c => fmt.pct(c) }],
+      camps);
+  } catch (e) { errorBox("advertising", e.message); }
+}
+
+async function loadAsin() {
+  skeleton("asin", "table", 1);
+  try {
+    const rows = await runQuery(fill(`PASTE QUERY 3-S seller / 3-V vendor (per-ASIN) HERE`));
+    el("asin").innerHTML =
+      `<div class="section-title">ASIN detail (current 30 days vs prior)</div>
+       <div class="card"><div id="asinTable"></div></div>`;
+    renderTable(document.getElementById("asinTable"),
+      [{ name: "ASIN", id: "asin" }, { name: "Product", id: "name" },
+       { name: "Sales", id: "cur_sales", formatter: c => fmt.usd(c) },
+       { name: "Units", id: "cur_units", formatter: c => fmt.int(c) },
+       { name: "vs Prior", id: "delta", formatter: c => gridjs.html(c) },
+       { name: "Conv", id: "conv", formatter: c => fmt.pct(c) },
+       { name: "Ad Spend", id: "spend", formatter: c => fmt.usd(c) },
+       { name: "ACoS", id: "acos", formatter: c => fmt.pct(c) },
+       { name: "On Hand", id: "oh", formatter: c => fmt.int(c) },
+       { name: "Flag", id: "flag", formatter: c => gridjs.html(c) }],
+      rows.map(r => {
+        const d = pctDelta(+r.cur_units, +r.pri_units);
+        const slow = d != null && d <= -50 && +r.pri_units > 10;
+        return {
+          asin: r.asin, name: (r.name || "").slice(0, 30),
+          cur_sales: r.cur_sales, cur_units: r.cur_units,
+          delta: d == null ? "—" : `<span class="delta ${d >= 0 ? "pos" : "neg"}">${d >= 0 ? "+" : ""}${d.toFixed(0)}%</span>`,
+          conv: r.conv, spend: r.spend, acos: r.acos, oh: r.oh,
+          flag: slow ? `<span class="tag slow">slow</span>` : "",
+        };
+      }));
+  } catch (e) { errorBox("asin", e.message); }
+}
+
+async function loadSearch() {
+  skeleton("search", "table", 1);
+  try {
+    const top = await runQuery(fill(`PASTE QUERY 4A (top terms by ad sales) HERE`));
+    const waste = await runQuery(fill(`PASTE QUERY 4B (wasted spend) HERE`));
+    const harvest = await runQuery(fill(`PASTE QUERY 4C (harvest) HERE`));
+    el("search").innerHTML =
+      `<div class="section-title">Top terms by ad sales</div><div class="card"><div id="stTop"></div></div>
+       <div class="section-title">Wasted spend (clicks, no orders)</div><div class="card"><div id="stWaste"></div></div>
+       <div class="section-title">Harvesting candidates</div><div class="card"><div id="stHarvest"></div></div>`;
+    const termCols = [{ name: "Search Term", id: "term" },
+      { name: "Spend", id: "spend", formatter: c => fmt.usd(c) },
+      { name: "Ad Sales", id: "ad_sales", formatter: c => fmt.usd(c) },
+      { name: "Orders", id: "orders", formatter: c => fmt.int(c) },
+      { name: "ACoS", id: "acos", formatter: c => fmt.pct(c) }];
+    renderTable(document.getElementById("stTop"), termCols, top);
+    renderTable(document.getElementById("stWaste"),
+      [{ name: "Search Term", id: "term" }, { name: "Clicks", id: "clicks", formatter: c => fmt.int(c) },
+       { name: "Spend", id: "spend", formatter: c => fmt.usd(c) }], waste);
+    renderTable(document.getElementById("stHarvest"), termCols, harvest);
+  } catch (e) { errorBox("search", e.message); }
+}
+
+async function loadInventory() {
+  skeleton("inventory", "table", 1);
+  try {
+    const rows = await runQuery(fill(`PASTE QUERY 5A seller / 5B vendor (inventory + cover) HERE`));
+    el("inventory").innerHTML =
+      `<div class="section-title">Inventory health (sorted by weeks of cover)</div>
+       <div class="card"><div id="invTable"></div></div>`;
+    // Inventory columns differ by channel: seller exposes Reserved/Inbound (AsinFbaInventory),
+    // vendor exposes Open POs/Unsellable (VendorInventory, query 5B). Map both onto two
+    // generic columns so the seller (5A) and vendor (5B) query outputs both render correctly.
+    const cA = IS_VENDOR ? { name: "Open POs", id: "cA", formatter: c => fmt.int(c) }
+                         : { name: "Reserved", id: "cA", formatter: c => fmt.int(c) };
+    const cB = IS_VENDOR ? { name: "Unsellable", id: "cB", formatter: c => fmt.int(c) }
+                         : { name: "Inbound", id: "cB", formatter: c => fmt.int(c) };
+    renderTable(document.getElementById("invTable"),
+      [{ name: "ASIN", id: "asin" }, { name: "Product", id: "name" },
+       { name: "On Hand", id: "oh", formatter: c => fmt.int(c) },
+       cA, cB,
+       { name: "Wks Cover", id: "weeks_of_cover", formatter: c => c == null ? "—" : (+c).toFixed(1) },
+       { name: "Flag", id: "flag", formatter: c => gridjs.html(c) }],
+      rows.map(r => {
+        const w = r.weeks_of_cover;
+        const low = w != null && w < 3 && +r.cur_units > 0;
+        const stranded = +r.oh > 0 && (+r.cur_units || 0) === 0;
+        return { asin: r.asin, name: (r.name || "").slice(0, 30), oh: r.oh,
+          cA: IS_VENDOR ? r.open_po : r.reserved,
+          cB: IS_VENDOR ? r.unsellable : r.inbound,
+          weeks_of_cover: w,
+          flag: low ? `<span class="tag risk">low cover</span>` : stranded ? `<span class="tag slow">stranded</span>` : "" };
+      }));
+  } catch (e) { errorBox("inventory", e.message); }
+}
+
+const LOADERS = { overview: loadOverview, advertising: loadAdvertising, asin: loadAsin, search: loadSearch, inventory: loadInventory };
+const _loaded = new Set();
+
+/* ============================ ROUTING ============================== */
+function showTab(id) {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === id));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === id));
+  if (!_loaded.has(id)) { _loaded.add(id); LOADERS[id](); }
+}
+
+async function reloadAll() {
+  const btn = document.getElementById("reloadBtn");
+  btn.disabled = true; btn.textContent = "↻ Reloading…";
+  _cache.clear();
+  // Re-probe latest date so the window slides forward as new data lands.
+  try {
+    const probe = await runQuery(`SELECT max(Date) latest FROM TotalSales WHERE Brand='${BRAND}'`, { fresh: true });
+    const newLatest = probe?.[0]?.latest;
+    if (newLatest) { LATEST = String(newLatest).slice(0, 10); W = windows(LATEST); }
+    const adProbe = await runQuery(`SELECT max(Date) latest FROM AdvertisingCampaignData WHERE Brand='${BRAND}' AND IsBrandActive=1 AND IsAccountActive=1`, { fresh: true });
+    const newAdLatest = adProbe?.[0]?.latest;
+    if (newAdLatest) { AD_LATEST = String(newAdLatest).slice(0, 10); WA = windows(AD_LATEST); }
+  } catch { /* keep baked-in anchors on probe failure */ }
+  document.getElementById("asOf").textContent = asOfText();
+  _loaded.clear();
+  const active = document.querySelector("nav button.active")?.dataset.tab || "overview";
+  showTab(active);
+  btn.disabled = false; btn.textContent = "↻ Reload";
+}
+
+/* ============================== INIT =============================== */
+function init() {
+  document.getElementById("brandName").textContent = BRAND;
+  document.getElementById("asOf").textContent = asOfText();
+  const nav = document.getElementById("tabnav");
+  nav.innerHTML = TABS.map(t => `<button data-tab="${t.id}" onclick="showTab('${t.id}')">${t.name}</button>`).join("");
+  showTab("overview");
+}
+init();
+</script>
+</body>
+</html>
