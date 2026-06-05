@@ -6,14 +6,13 @@ Each skill is a single top-level folder in this repository, for example
 `daily-brand-check` or `weekly-report`. You do not need git or the command line
 to grab one — the whole thing can be done in your browser.
 
-1. Go to https://github.com/therealkapoq/kstack
-2. Click the green "Code" button near the top-right of the file list, then
+1. Click the green "Code" button near the top-right of the file list, then
    click "Download ZIP". Your browser downloads a file named `kstack-main.zip`.
-3. Open the downloaded ZIP file. On most computers you just double-click it to
+2. Open the downloaded ZIP file. On most computers you just double-click it to
    unzip it, which gives you a folder called `kstack-main`.
-4. Open the `kstack-main` folder. Inside it you'll see one folder per skill.
+3. Open the `kstack-main` folder. Inside it you'll see one folder per skill.
    Find the one you want, for example `daily-brand-check`.
-5. Start a Claude session and tell it to install the skill, pointing it at that
+4. Start a Claude session and tell it to install the skill, pointing it at that
    skill's folder. Claude copies the skill into place for you, no manual file
    shuffling required. Here are some sample installation prompts for Mac, Linux,
    and Windows:
