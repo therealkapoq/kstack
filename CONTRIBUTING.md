@@ -1,6 +1,6 @@
-# Contributing to kstack
+# Contributing to the kstack
 
-kstack is a collection of open-source AI skills for running an advertising
+The kstack is a collection of open-source AI skills for running an advertising
 agency on Amazon, Walmart, and Target, primarily against Kapoq's MCP server
 (and other tools). Inspired by Garry Tan's gstack.
 
