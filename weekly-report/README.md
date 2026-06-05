@@ -81,5 +81,3 @@ subset per brand with `--config`; keys are deep-merged over the defaults.
 
 - Generated reports contain real business data and are git-ignored by default — keep them out of
   the repo.
-- `SKILL.md` includes illustrative tenant/brand names and example figures. If this repo is public,
-  review and scrub those first.
