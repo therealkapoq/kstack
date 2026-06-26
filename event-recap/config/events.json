@@ -1,0 +1,34 @@
+{
+  "_comment": "Known Amazon US sales-event windows. Amazon announces exact dates each year — ALWAYS confirm against the actual data (max event-day with a spend spike) before trusting these. Dates are inclusive [start, end]. For non-US marketplaces, confirm locally; events often differ by country.",
+  "events": {
+    "Prime Day": {
+      "2023": ["2023-07-11", "2023-07-12"],
+      "2024": ["2024-07-16", "2024-07-17"],
+      "2025": ["2025-07-08", "2025-07-11"],
+      "2026": ["2026-06-23", "2026-06-26"]
+    },
+    "Prime Big Deal Days": {
+      "2023": ["2023-10-10", "2023-10-11"],
+      "2024": ["2024-10-08", "2024-10-09"],
+      "2025": ["2025-10-07", "2025-10-08"]
+    },
+    "Spring Sale": {
+      "2024": ["2024-03-20", "2024-03-25"],
+      "2025": ["2025-03-25", "2025-03-31"]
+    },
+    "Black Friday / Cyber Monday": {
+      "2024": ["2024-11-21", "2024-12-02"],
+      "2025": ["2025-11-20", "2025-12-01"]
+    }
+  },
+  "defaults": {
+    "baseline_days": 3,
+    "baseline_gap_days": 1,
+    "_baseline_comment": "Baseline = the N days ending `baseline_gap_days` before the event start (avoids pre-event ramp bleeding into the run-rate). For Prime Day, a 3-day baseline ending the day before the event works well.",
+    "keyword_top_n": 50,
+    "product_top_n": 14,
+    "deal_top_n": 14,
+    "kw_low_min_spend": 8,
+    "_kw_low_comment": "Keywords below this spend are excluded from the 'lowest performing' list so noise doesn't crowd out real waste."
+  }
+}
