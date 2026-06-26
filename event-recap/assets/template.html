@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#0c1124; --night2:#10162e; --panel:#161d3a; --panel2:#1b234680;
+    --line:#2a3360; --ink:#eef0fb; --muted:#9aa2c4; --faint:#6b739a;
+    --cy:#e8b15a; --cy-soft:#e8b15a33; --py:#8c9bf0; --py-soft:#8c9bf033;
+    --up:#5dc8a0; --down:#ef7d72; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--night); color:var(--ink); font-family:'Inter',system-ui,sans-serif; font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased}
+  .num{font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
+  h1,h2,h3,.disp{font-family:'Space Grotesk',sans-serif; letter-spacing:-.01em}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 22px 80px}
+  header{position:relative; overflow:hidden;
+    background:radial-gradient(1200px 380px at 78% -40%, #29336a55, transparent 60%),radial-gradient(800px 300px at 12% -30%, #3a2c5a55, transparent 55%),linear-gradient(180deg,#0a0e20,#0c1124);
+    border-bottom:1px solid var(--line)}
+  .stars{position:absolute; inset:0; pointer-events:none}
+  .hwrap{max-width:1180px; margin:0 auto; padding:30px 22px 26px}
+  .crumb{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--cy); font-weight:600}
+  h1{font-size:34px; font-weight:700; margin:8px 0 6px; line-height:1.05}
+  h1 .sub{color:var(--muted); font-weight:500}
+  .acct{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin-top:12px; color:var(--muted); font-size:13px}
+  .acct b{color:var(--ink); font-weight:600}
+  .pill{display:inline-flex; align-items:center; gap:7px; background:#2a1c0f; border:1px solid #5a3d18; color:var(--cy); padding:4px 11px; border-radius:999px; font-size:12px; font-weight:600}
+  .basis{display:flex; gap:12px; align-items:flex-start; margin:18px 0 4px; background:var(--panel2); border:1px solid var(--line); border-left:3px solid var(--cy); border-radius:10px; padding:13px 16px; color:var(--muted); font-size:13px}
+  .basis b{color:var(--ink)}
+  .legend{display:flex; gap:18px; margin-left:auto; font-size:12px; white-space:nowrap}
+  .legend span{display:inline-flex; align-items:center; gap:6px}
+  .sw{width:12px;height:3px;border-radius:2px;display:inline-block}
+  nav.tabs{display:flex; gap:4px; margin:24px 0 18px; border-bottom:1px solid var(--line); flex-wrap:wrap}
+  .tab{appearance:none; background:none; border:0; color:var(--muted); font-family:'Space Grotesk'; font-size:14px; font-weight:600; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .15s}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink); border-bottom-color:var(--cy)}
+  .panel{display:none; animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
+  .sh{display:flex; align-items:baseline; gap:12px; margin:26px 0 14px}
+  .sh h2{font-size:18px; margin:0}
+  .sh .meta{color:var(--faint); font-size:12.5px}
+  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+  .kpis.q{margin-top:12px}
+  .kpi{background:linear-gradient(180deg,var(--panel),#131a36); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px}
+  .kpi.soft{background:#12193380}
+  .kpi .k-l{color:var(--muted); font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:.04em}
+  .kpi .k-v{font-family:'Space Grotesk'; font-size:25px; font-weight:600; margin:7px 0 2px}
+  .kpi .k-py{color:var(--faint); font-size:12px}
+  .kpi .k-py b{color:var(--py); font-weight:600}
+  .chip{display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; margin-top:8px}
+  .chip.up{color:var(--up); background:#143628}
+  .chip.down{color:var(--down); background:#3a1a18}
+  .chip.flat{color:var(--muted); background:#222a4d}
+  .chip.warn{color:var(--cy); background:#33240f}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px}
+  .grid2{display:grid; grid-template-columns:1.4fr 1fr; gap:14px}
+  .grid2b{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th,td{padding:8px 10px; text-align:right; white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  thead th{color:var(--muted); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.03em; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--panel)}
+  th.sortable{cursor:pointer; user-select:none}
+  th.sortable:hover{color:var(--ink)}
+  th.sortable.sa::after{content:" ▲"; color:var(--cy); font-size:9px}
+  th.sortable.sd::after{content:" ▼"; color:var(--cy); font-size:9px}
+  tbody tr{border-bottom:1px solid #1d2547}
+  tbody tr:hover{background:#1a224422}
+  tbody td.kw{white-space:normal; max-width:280px; color:var(--ink)}
+  .mt{color:var(--faint); font-size:11px; text-transform:uppercase; letter-spacing:.03em}
+  .scroll{overflow:auto; max-height:560px; border-radius:10px}
+  .good{color:var(--up)} .bad{color:var(--down)}
+  .barcell{position:relative}
+  .bar{position:absolute; left:0; top:0; bottom:0; background:var(--cy-soft); border-radius:4px; z-index:0}
+  .bar.py{background:var(--py-soft)}
+  .barcell span{position:relative; z-index:1}
+  .daytbl td.d, .daytbl th.d{text-align:center}
+  .yr-tag{font-size:10px; font-weight:700; padding:1px 6px; border-radius:5px}
+  .yr-tag.cy{color:var(--cy); background:#33240f}
+  .yr-tag.py{color:var(--py); background:#1d2350}
+  .partial{color:var(--cy); font-size:10px; font-weight:700; margin-left:4px}
+  .chart-wrap{position:relative}
+  svg{display:block; width:100%; height:auto; overflow:visible}
+  .seg-toggle{display:inline-flex; background:#131a36; border:1px solid var(--line); border-radius:9px; padding:3px}
+  .seg{appearance:none; border:0; background:none; color:var(--muted); font-weight:600; font-size:12.5px; padding:5px 12px; border-radius:6px; cursor:pointer; font-family:'Inter'}
+  .seg.on{background:var(--cy); color:#1a1206}
+  .toolbar{display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap}
+  .toolbar .sp{flex:1}
+  .note{color:var(--faint); font-size:12px; margin-top:10px; line-height:1.5}
+  .pending{display:inline-flex;align-items:center;gap:7px;background:#33240f;border:1px solid #5a3d18; color:var(--cy);border-radius:9px;padding:9px 13px;font-size:12.5px}
+  .insight{background:linear-gradient(180deg,#15203f,#131a36);border:1px solid var(--line);border-left:3px solid var(--cy);border-radius:12px;padding:16px 18px;margin-top:14px}
+  .insight h3{margin:0 0 6px;font-size:15px;color:var(--cy)}
+  .insight p{margin:0;color:var(--ink);font-size:13.5px;line-height:1.6}
+  .takeaway{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);color:var(--muted);font-size:12.5px;line-height:1.55}
+  .takeaway b{color:var(--cy);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:10.5px;margin-right:7px}
+  .exec{background:linear-gradient(135deg,#1b2550,#141b38);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:6px}
+  .exec .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cy);font-weight:700}
+  .exec .verdict{font-family:'Space Grotesk';font-size:21px;font-weight:600;line-height:1.28;margin:9px 0 11px;color:var(--ink)}
+  .exec p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.62;max-width:66ch}
+  .exec .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+  .exec .etag{font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .exec .etag.up{color:var(--up);border-color:#1f5340;background:#11281e}
+  .exec .etag.warn{color:var(--cy);border-color:#5a3d18;background:#241809}
+  .exec .basis2{color:var(--faint);font-size:11.5px;margin-top:13px}
+  .lift-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .lift{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .lift .ll{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .lift .lv{font-family:'Space Grotesk';font-size:30px;font-weight:600;margin:8px 0 2px;color:var(--cy)}
+  .lift .lp{color:var(--py);font-size:13px;font-weight:600}
+  .lift .lb{color:var(--faint);font-size:11.5px;margin-top:6px}
+  footer{color:var(--faint); font-size:11.5px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.6}
+  @media(max-width:860px){.kpis,.kpis.q,.lift-grid{grid-template-columns:repeat(2,1fr)} .grid2,.grid2b{grid-template-columns:1fr} h1{font-size:26px} .legend{margin-left:0; width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <svg class="stars" viewBox="0 0 1180 220" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <div class="hwrap">
+    <div class="crumb" id="crumb"></div>
+    <h1 id="title"></h1>
+    <div class="acct" id="acct"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="basis"><div id="basisNote"></div>
+    <div class="legend num"><span><i class="sw" style="background:var(--cy)"></i> <span id="lgCy"></span></span><span><i class="sw" style="background:var(--py)"></i> <span id="lgPy"></span></span></div>
+  </div>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <section class="panel active" id="overview">
+    <div class="exec" id="exec"></div>
+    <div class="sh"><h2 id="primaryHead"></h2><span class="meta" id="primaryMeta"></span></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="note">Chips show year-over-year change vs the comparable window in the prior year. Rate metrics (ACoS, TACoS) are shown as percentage-point change (pp); dollar and volume metrics — including CPC — use relative % change.</div>
+    <div class="sh"><h2>Quality signals</h2><span class="meta" id="qualMeta"></span></div>
+    <div class="kpis q" id="quality"></div>
+    <div class="insight" id="whatChanged"></div>
+    <div class="insight" id="stockWatch"></div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card chart-wrap">
+        <div class="toolbar"><h3 style="margin:0; font-size:15px">Event arc</h3><span class="mt" id="chartMetricLbl"></span><span class="sp"></span>
+          <div class="seg-toggle" id="metricSeg">
+            <button class="seg on" data-m="total">Total sales</button><button class="seg" data-m="adsales">Ad sales</button><button class="seg" data-m="cost">Ad spend</button>
+          </div>
+        </div>
+        <div id="chart"></div>
+        <div class="note" id="chartNote"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 4px; font-size:15px">Event-to-date rollup</h3>
+        <div class="mt" id="rollupMeta" style="margin-bottom:10px"></div>
+        <table class="num"><tbody id="rollup"></tbody></table>
+        <div class="note" id="rollupNote"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="daily">
+    <div class="sh"><h2>Day by day</h2><span class="meta">Aligned by event day · current year over prior year</span></div>
+    <div class="card scroll"><table class="num daytbl" id="dailyTbl"></table></div>
+    <div class="card" id="trafficCard" style="margin-top:14px">
+      <h3 style="margin:0 0 4px; font-size:15px">Traffic &amp; conversion</h3>
+      <table class="num" id="trafficTbl"></table>
+      <div id="trafficPending" style="margin-top:12px"></div>
+      <div class="note">Site conversion = units ordered ÷ sessions (Amazon "unit session %"). Ad conversion = ad orders ÷ ad clicks.</div>
+    </div>
+  </section>
+
+  <section class="panel" id="lift">
+    <div class="sh"><h2>Lift over baseline</h2><span class="meta" id="liftMeta"></span></div>
+    <div class="lift-grid" id="liftCards"></div>
+    <div class="insight" id="liftInsight"></div>
+    <div class="card" style="margin-top:14px"><table class="num" id="liftTbl"></table>
+      <div class="note">Lift = average event-day value ÷ average pre-event daily value. A 4× lift means an event day did 4× a normal day.</div>
+    </div>
+  </section>
+
+  <section class="panel" id="keywords">
+    <div class="sh"><h2>Keyword performance</h2><span class="meta">Keyword-targeted spend during the event window</span></div>
+    <div class="toolbar"><div class="seg-toggle" id="kwYear"></div><span class="sp"></span><span class="mt" id="kwScope"></span></div>
+    <div class="grid2b">
+      <div class="card"><h3 style="margin:0 0 2px; font-size:15px">Highest performing</h3><div class="mt" style="margin-bottom:8px">Top keywords by ad sales</div><div class="scroll"><table class="num" id="kwTop"></table></div></div>
+      <div class="card"><h3 style="margin:0 0 2px; font-size:15px; color:var(--down)">Lowest performing</h3><div class="mt" style="margin-bottom:8px">Highest spend with weakest return (worst ACoS / no sales)</div><div class="scroll"><table class="num" id="kwBot"></table></div></div>
+    </div>
+    <div class="note">"Lowest performing" ranks keywords that spent the most while returning the least — ACoS above target or zero attributed sales. First candidates for bid cuts or negation.</div>
+  </section>
+
+  <section class="panel" id="products">
+    <div class="sh"><h2>Products</h2><span class="meta">Total sales (organic + ad)</span></div>
+    <div class="toolbar"><div class="seg-toggle" id="prodView">
+      <button class="seg on" data-v="movers" id="moversBtn">Movers (YoY)</button><button class="seg" data-v="todate">Event-to-date</button></div>
+      <span class="sp"></span><span class="mt" id="prodScope"></span></div>
+    <div class="card scroll"><table class="num" id="prodTbl"></table></div>
+    <div class="note" id="prodNote"></div>
+  </section>
+
+  <section class="panel" id="deals">
+    <div class="sh"><h2>Deals</h2><span class="meta">Deal performance during the event</span></div>
+    <div class="kpis" id="dealKpis"></div>
+    <div class="card scroll" style="margin-top:16px"><h3 style="margin:0 0 8px; font-size:15px" id="deal25Head"></h3><table class="num" id="deal25"></table></div>
+    <div class="card" id="deal26Card" style="margin-top:14px"><h3 style="margin:0 0 8px; font-size:15px" id="deal26Head"></h3><table class="num" id="deal26"></table><div id="deal26Pending" style="margin-top:12px"></div></div>
+    <div class="insight" id="dealsInsight"></div>
+    <div class="note" id="couponsNote"></div>
+  </section>
+
+  <section class="panel" id="ads">
+    <div class="sh"><h2>Ad spend breakdown</h2><span class="meta" id="ctMeta"></span></div>
+    <div class="card scroll"><table class="num" id="ctTbl"></table></div>
+    <div class="note">CPC = cost ÷ clicks. ACoS = cost ÷ ad sales.</div>
+    <div id="dspWrap">
+      <div class="sh" style="margin-top:22px"><h2>DSP (display)</h2><span class="meta" id="dspMeta"></span></div>
+      <div class="kpis q" id="dspKpis"></div>
+      <div class="note" id="dspNote"></div>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+const D = /*__DATA__*/ null;
+
+/* ---------- helpers ---------- */
+const $=(s,e=document)=>e.querySelector(s);
+const $$=(s,e=document)=>[...e.querySelectorAll(s)];
+const CUR=(D&&D.meta&&D.meta.currencySymbol)||'$';
+const usd=(n,d=0)=> n==null?'—':CUR+Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const num=(n)=> n==null?'—':Number(n).toLocaleString('en-US');
+const pct=(n,d=1)=> n==null?'—':Number(n).toFixed(d)+'%';
+const sum=(a)=>a.reduce((x,y)=>x+(y||0),0);
+const avg=(a)=>{const v=a.filter(x=>x!=null);return v.length?sum(v)/v.length:0;};
+function relChip(cy,py,opts={}){
+  if(cy==null||py==null) return '<span class="chip flat">—</span>';
+  if(py===0) return '<span class="chip flat">n/a</span>';
+  const d=(cy-py)/Math.abs(py)*100, good=opts.lowerBetter?d<0:d>0;
+  if(opts.neutral) return `<span class="chip warn">${d>=0?'+':''}${d.toFixed(1)}%</span>`;
+  const cls=Math.abs(d)<0.5?'flat':(good?'up':'down'), sign=d>0?'+':'';
+  return `<span class="chip ${cls}">${sign}${d.toFixed(1)}%</span>`;
+}
+function ppChip(cy,py,opts={}){
+  if(cy==null||py==null) return '<span class="chip flat">—</span>';
+  const d=cy-py, good=opts.lowerBetter?d<0:d>0;
+  const cls=Math.abs(d)<0.05?'flat':(good?'up':'down'), sign=d>0?'+':'';
+  return `<span class="chip ${cls}">${sign}${d.toFixed(1)} pp</span>`;
+}
+
+const M=D.meta, DAILY=D.daily, BASE=D.baseline, FLAGS=D.flags;
+const cyD=DAILY.cy, pyD=DAILY.py;
+const K=FLAGS.completeCyDays;            // number of complete current-year event days
+const EVLEN=M.cyDates.length;
+const basisLabel = K>=EVLEN ? 'full event' : (K===1?'Day 1':'first '+K+' days');
+
+/* aggregate ad+sales over first n event days for a side ('cy'|'py') */
+function agg(side,n){
+  const S=DAILY[side], o={impr:0,clk:0,cost:0,adsales:0,orders:0,ntbO:0,ntbS:0,sales:0,units:0,sessions:0,hasSess:false};
+  for(let i=0;i<n;i++){
+    const a=S.ad[i]; if(a){o.impr+=a.impr||0;o.clk+=a.clk||0;o.cost+=a.cost||0;o.adsales+=a.adsales||0;o.orders+=a.orders||0;o.ntbO+=a.ntbO||0;o.ntbS+=a.ntbS||0;}
+    if(S.sales[i]!=null)o.sales+=S.sales[i];
+    if(S.units[i]!=null)o.units+=S.units[i];
+    if(S.sessions[i]!=null){o.sessions+=S.sessions[i];o.hasSess=true;}
+  }
+  return o;
+}
+const PC=agg('cy',K), PP=agg('py',K);
+
+/* ---------- header / basis ---------- */
+document.title=M.title;
+$('#crumb').textContent=M.crumb;
+$('#title').innerHTML=`${M.brand} <span class="sub">— ${M.subtitle}</span>`;
+$('#acct').innerHTML=M.acct.map(a=>`<span><b>${a.l}</b> ${a.v}</span>`).join('')+`<span class="pill">${M.pill}</span>`;
+$('#lgCy').textContent=M.cyLabel; $('#lgPy').textContent=M.pyLabel;
+$('#basisNote').innerHTML=M.basisNote;
+$('#footer').innerHTML=M.footer;
+
+/* ---------- tabs ---------- */
+const TABS=[['overview','Overview'],['daily','Day by day'],['lift','Lift &amp; baseline'],['keywords','Keywords'],['products','Products']];
+if(FLAGS.showDeals) TABS.push(['deals','Deals']);
+TABS.push(['ads','Ad breakdown']);
+$('#tabs').innerHTML=TABS.map((t,i)=>`<button class="tab${i===0?' active':''}" data-p="${t[0]}">${t[1]}</button>`).join('');
+if(!FLAGS.showDeals) $('#deals').remove();
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;$$('.tab').forEach(t=>t.classList.toggle('active',t===b));$$('.panel').forEach(p=>p.classList.toggle('active',p.id===b.dataset.p));});
+
+/* ---------- primary KPI cards ---------- */
+$('#primaryHead').textContent = K>=EVLEN ? 'Full-event comparison' : (K===1?'Day 1 like-for-like':basisLabel.replace(/^./,c=>c.toUpperCase())+' like-for-like');
+$('#primaryMeta').textContent = M.primaryMeta;
+function kpiCards(){
+  const cpc=a=>a.cost/a.clk, acos=a=>a.cost/a.adsales*100, tacos=a=>a.cost/a.sales*100;
+  const def=[
+    {l:'Total sales',cy:PC.sales,py:PP.sales,f:v=>usd(v)},
+    {l:'Ad sales',cy:PC.adsales,py:PP.adsales,f:v=>usd(v)},
+    {l:'Ad spend',cy:PC.cost,py:PP.cost,f:v=>usd(v),neutral:true},
+    {l:'TACoS',cy:tacos(PC),py:tacos(PP),f:v=>pct(v),lower:true,pp:true},
+    {l:'ACoS',cy:acos(PC),py:acos(PP),f:v=>pct(v),lower:true,pp:true},
+    {l:'CPC',cy:cpc(PC),py:cpc(PP),f:v=>usd(v,2),lower:true},
+    {l:'Ad orders',cy:PC.orders,py:PP.orders,f:v=>num(v)},
+    {l:'New-to-brand orders',cy:PC.ntbO,py:PP.ntbO,f:v=>num(v)}
+  ];
+  $('#kpis').innerHTML=def.map(d=>{
+    const chip=d.pp?ppChip(d.cy,d.py,{lowerBetter:d.lower}):relChip(d.cy,d.py,{lowerBetter:d.lower,neutral:d.neutral});
+    return `<div class="kpi"><div class="k-l">${d.l}</div><div class="k-v num">${d.f(d.cy)}</div><div class="k-py num">${M.pyLabel}: <b>${d.f(d.py)}</b></div>${chip}</div>`;
+  }).join('');
+}
+
+/* ---------- quality + derived signals ---------- */
+const orgC=(PC.sales-PC.adsales)/PC.sales*100, orgP=(PP.sales-PP.adsales)/PP.sales*100;
+const ntbC=PC.orders?PC.ntbO/PC.orders*100:0, ntbP=PP.orders?PP.ntbO/PP.orders*100:0;
+const aspC=PC.units?PC.sales/PC.units:0, aspP=PP.units?PP.sales/PP.units:0;
+const ctrC=PC.impr?PC.clk/PC.impr*100:0, ctrP=PP.impr?PP.clk/PP.impr*100:0;
+const tacosC=PC.cost/PC.sales*100, tacosP=PP.cost/PP.sales*100;
+function qualityCards(){
+  $('#qualMeta').textContent=(K===1?'Day 1':basisLabel)+' — the story behind the headline numbers';
+  const cards=[
+    {l:'Organic sales share',vc:pct(orgC),vp:pct(orgP),chip:ppChip(orgC,orgP)},
+    {l:'New-to-brand rate',vc:pct(ntbC),vp:pct(ntbP),chip:ppChip(ntbC,ntbP)},
+    {l:'Avg selling price',vc:usd(aspC,2),vp:usd(aspP,2),chip:relChip(aspC,aspP)},
+    {l:'Ad CTR',vc:pct(ctrC,2),vp:pct(ctrP,2),chip:relChip(ctrC,ctrP)}
+  ];
+  $('#quality').innerHTML=cards.map(c=>`<div class="kpi soft"><div class="k-l">${c.l}</div><div class="k-v num" style="font-size:22px">${c.vc}</div><div class="k-py num">${M.pyLabel}: <b>${c.vp}</b></div>${c.chip}</div>`).join('');
+}
+
+/* ---------- narrative (rule-based, deterministic) ---------- */
+function pctTxt(n){const a=Math.abs(n);return (n>=0?'+':'−')+a.toFixed(0)+'%';}
+const salesDelta=(PC.sales-PP.sales)/PP.sales*100;
+const baseAvgC=avg(BASE.cy.sales), baseAvgP=avg(BASE.py.sales);
+const baselineDelta=baseAvgP?(baseAvgC-baseAvgP)/baseAvgP*100:0;
+const eventDailyC=PC.sales/K, eventDailyP=PP.sales/K;
+const liftMultC=baseAvgC?eventDailyC/baseAvgC:0, liftMultP=baseAvgP?eventDailyP/baseAvgP:0;
+const adLiftC=avg(BASE.cy.adsales)?(PC.adsales/K)/avg(BASE.cy.adsales):0, adLiftP=avg(BASE.py.adsales)?(PP.adsales/K)/avg(BASE.py.adsales):0;
+const organicLed = orgC>orgP && tacosC<tacosP;
+const volumeDriven = aspC>=aspP*0.985;
+const ntbDown = ntbC<ntbP-0.3, ntbUp = ntbC>ntbP+0.3;
+const strongerEvent = liftMultC>liftMultP*1.03;
+const weakerEvent = liftMultC<liftMultP*0.97;
+
+function buildExec(){
+  let verdict;
+  const grew=salesDelta>3, fell=salesDelta<-3;
+  const lead = grew?`${M.eventName} ${K===1?'Day 1':basisLabel} sales grew ${pctTxt(salesDelta)} year-over-year`
+            : fell?`${M.eventName} ${K===1?'Day 1':basisLabel} sales fell ${pctTxt(salesDelta)} year-over-year`
+            : `${M.eventName} ${K===1?'Day 1':basisLabel} sales were about flat year-over-year`;
+  if(grew && !strongerEvent && baselineDelta>3) verdict=`${lead} — but it's a bigger starting line, not a bigger ${M.eventName}.`;
+  else if(grew && strongerEvent) verdict=`${lead} — and the event itself ran hotter than last year.`;
+  else if(fell) verdict=`${lead}, and the event multiple ${weakerEvent?'softened too':'held'} versus last year.`;
+  else verdict=`${lead}.`;
+
+  let p='';
+  p+=`The brand went into the event running about <b style="color:var(--ink)">${pctTxt(baselineDelta)}</b> ${baselineDelta>=0?'above':'below'} its prior-year pre-event run-rate, and the event-day spike over that baseline was ${strongerEvent?'<b style="color:var(--ink)">stronger</b> than':(weakerEvent?'<b style="color:var(--ink)">weaker</b> than':'about the same as')} a year ago (~${liftMultC.toFixed(1)}× vs ~${liftMultP.toFixed(1)}×). `;
+  if(organicLed) p+=`Growth was <b style="color:var(--ink)">organic-led</b> — organic share of sales rose to ${orgC.toFixed(0)}% (from ${orgP.toFixed(0)}%) and TACoS fell. `;
+  else p+=`The mix leaned <b style="color:var(--ink)">more on ads</b> this year — organic share moved to ${orgC.toFixed(0)}% (from ${orgP.toFixed(0)}%) and TACoS ${tacosC>tacosP?'rose':'held'}. `;
+  p+=volumeDriven?`Growth was <b style="color:var(--ink)">volume-driven, not discount-driven</b> (average selling price held at ${usd(aspC,0)}). `:`Average selling price <b style="color:var(--ink)">fell</b> to ${usd(aspC,0)} (from ${usd(aspP,0)}), so some of the movement is price/discount, not just volume. `;
+  if(ntbDown) p+=`The watch-item: <b style="color:var(--ink)">new-to-brand slipped</b> from ${ntbP.toFixed(1)}% to ${ntbC.toFixed(1)}% of ad orders, so more of the event rode on existing customers.`;
+  else if(ntbUp) p+=`Encouragingly, <b style="color:var(--ink)">new-to-brand rose</b> from ${ntbP.toFixed(1)}% to ${ntbC.toFixed(1)}% of ad orders.`;
+  else p+=`New-to-brand share held steady (~${ntbC.toFixed(1)}% of ad orders).`;
+
+  const tags=[];
+  tags.push({c:salesDelta>=0?'up':'warn',t:`Sales ${pctTxt(salesDelta)} YoY`});
+  tags.push({c:organicLed?'up':'',t:organicLed?'Organic-led':'Ad-led'});
+  tags.push({c:tacosC<=tacosP?'up':'warn',t:`TACoS ${(tacosC-tacosP>=0?'+':'')}${(tacosC-tacosP).toFixed(1)} pp`});
+  if(ntbDown) tags.push({c:'warn',t:`New-to-brand down ${(ntbP-ntbC).toFixed(1)} pp`});
+  else if(ntbUp) tags.push({c:'up',t:`New-to-brand up ${(ntbC-ntbP).toFixed(1)} pp`});
+
+  $('#exec').innerHTML=`<div class="eyebrow">Bottom line</div><div class="verdict">${verdict}</div><p>${p}</p>
+    <div class="tags">${tags.map(t=>`<span class="etag ${t.c}">${t.t}</span>`).join('')}</div>
+    <div class="basis2">Basis: ${K===1?'Day 1':basisLabel} — ${M.cyDates[0]}, ${M.cyYear} vs ${M.pyDates[0]}, ${M.pyYear}${K>1?` (first ${K} days)`:''} — the comparable complete window on both sides. Everything below is the supporting evidence.</div>`;
+}
+
+function buildWhatChanged(){
+  let p=`${K===1?'Day-1':basisLabel} sales ${salesDelta>=0?'grew':'fell'} ${pctTxt(salesDelta)} on ${Math.abs((PC.adsales-PP.adsales)/PP.adsales*100)<5?'essentially flat':((PC.adsales>PP.adsales?'higher':'lower'))} ad sales and ${pctTxt((PC.cost-PP.cost)/PP.cost*100)} ad spend. `;
+  p+=organicLed?`<b>Organic carried more of the period</b> — organic share rose to ${orgC.toFixed(0)}% (from ${orgP.toFixed(0)}%), TACoS fell, and CTR moved ${pctTxt((ctrC-ctrP)/ctrP*100)}. `:`The period leaned more on paid — organic share is ${orgC.toFixed(0)}% (vs ${orgP.toFixed(0)}%) and CTR moved ${pctTxt((ctrC-ctrP)/ctrP*100)}. `;
+  p+=volumeDriven?`Growth was <b>volume-driven, not discount-driven</b> (ASP ~${usd(aspC,0)}). `:`ASP fell to ${usd(aspC,0)}, so discounting played a role. `;
+  p+=ntbDown?`The one watch-item: <b>new-to-brand slipped</b> to ${ntbC.toFixed(1)}% of ad orders from ${ntbP.toFixed(1)}%.`:(ntbUp?`<b>New-to-brand improved</b> to ${ntbC.toFixed(1)}% of ad orders.`:`New-to-brand held near ${ntbC.toFixed(1)}%.`);
+  let tk = ntbDown?`Protect the efficient organic structure, but earmark a slice of event budget specifically for new-to-brand — upper-funnel SB/SD and broader match — so growth isn't carried almost entirely by repeat buyers.`
+        : organicLed?`The organic-led, efficient structure is working; codify the keyword and placement mix that drove it so it's repeatable next event.`
+        : `Re-balance toward efficiency next event — the period leaned heavily on paid; test trimming the lowest-ROAS spend (see Keywords) and shifting budget to better-converting terms.`;
+  $('#whatChanged').innerHTML=`<h3>What changed</h3><p>${p}</p><div class="takeaway"><b>Next time</b> ${tk}</div>`;
+}
+
+/* ---------- rollup ---------- */
+function rollup(){
+  $('#rollupMeta').textContent=`${M.cyLabel} so far (${basisLabel.replace('first ','first ')}${FLAGS.partial?' + partial':''}) vs ${M.pyLabel} ${FLAGS.partial?'full event':'event'}`;
+  const cyA=agg('cy',cyD.ad.filter(Boolean).length), pyA=agg('py',EVLEN);
+  const cyUnits=sum(cyD.units), pyUnits=sum(pyD.units), cySales=sum(cyD.sales), pySales=sum(pyD.sales);
+  const rows=[
+    ['Total sales',usd(cySales),usd(pySales)],['Units sold',num(cyUnits),num(pyUnits)],
+    ['Ad spend',usd(cyA.cost),usd(pyA.cost)],['Ad sales',usd(cyA.adsales),usd(pyA.adsales)],
+    ['Ad orders',num(cyA.orders),num(pyA.orders)],['Impressions',num(cyA.impr),num(pyA.impr)],
+    ['Clicks',num(cyA.clk),num(pyA.clk)],['ACoS',pct(cyA.cost/cyA.adsales*100),pct(pyA.cost/pyA.adsales*100)],
+    ['CPC',usd(cyA.cost/cyA.clk,2),usd(pyA.cost/pyA.clk,2)],['NTB orders',num(cyA.ntbO),num(pyA.ntbO)],['NTB ad sales',usd(cyA.ntbS),usd(pyA.ntbS)]
+  ];
+  $('#rollup').innerHTML=`<tr><th style="text-align:left">Metric</th><th><span class="yr-tag cy">${M.cyLabel}${FLAGS.partial?' to-date':''}</span></th><th><span class="yr-tag py">${M.pyLabel}${FLAGS.partial?' full':''}</span></th></tr>`+
+    rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="color:var(--py)">${r[2]}</td></tr>`).join('');
+  $('#rollupNote').textContent=FLAGS.partial?`${M.cyLabel} totals are a partial event, not directly comparable to the full ${M.pyLabel} total. The headline and Lift tabs hold the fair comparisons.`:`Both years are full-event totals.`;
+}
+
+/* ---------- chart ---------- */
+let chartMetric='total';
+function chart(){
+  const W=560,H=250,padL=58,padR=18,padT=18,padB=34, days=M.cyDates.map((_,i)=>i+1);
+  const S={total:{py:pyD.sales,cy:cyD.sales,lbl:'Total sales by event day'},
+    adsales:{py:pyD.ad.map(a=>a?a.adsales:null),cy:cyD.ad.map(a=>a?a.adsales:null),lbl:'Ad sales by event day'},
+    cost:{py:pyD.ad.map(a=>a?a.cost:null),cy:cyD.ad.map(a=>a?a.cost:null),lbl:'Ad spend by event day'}}[chartMetric];
+  $('#chartMetricLbl').textContent=S.lbl;
+  const all=[...S.py,...S.cy].filter(v=>v!=null), max=Math.max(...all)*1.12||1;
+  const n=days.length, x=i=>padL+(n>1?i*((W-padL-padR)/(n-1)):0), y=v=>padT+(H-padT-padB)*(1-v/max), gx=days.map((_,i)=>x(i));
+  const path=arr=>{let p=[];arr.forEach((v,i)=>{if(v!=null)p.push([gx[i],y(v)]);});return p.length?'M'+p.map(q=>q[0]+','+q[1]).join(' L'):'';};
+  let grid='';for(let g=0;g<=4;g++){const gv=max*g/4,yy=y(gv);grid+=`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#222a4d"/><text x="${padL-8}" y="${yy+4}" text-anchor="end" fill="#6b739a" font-size="10">${usd(gv).replace('.00','')}</text>`;}
+  let xl='';days.forEach((d,i)=>xl+=`<text x="${gx[i]}" y="${H-12}" text-anchor="middle" fill="#9aa2c4" font-size="11" font-family="Space Grotesk" font-weight="600">Day ${d}</text>`);
+  const mk=(arr,color,comp)=>{let m='';arr.forEach((v,i)=>{if(v==null)return;const h=!comp[i];m+=`<circle cx="${gx[i]}" cy="${y(v)}" r="${h?5:4.5}" fill="${h?'#10162e':color}" stroke="${color}" stroke-width="2"/><text x="${gx[i]}" y="${y(v)-12}" text-anchor="middle" fill="${color}" font-size="10.5" font-weight="700">${usd(v).replace('.00','')}</text>`;});return m;};
+  $('#chart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${S.lbl}">${grid}${xl}
+    <path d="${path(S.py)}" fill="none" stroke="var(--py)" stroke-width="2.5"/><path d="${path(S.cy)}" fill="none" stroke="var(--cy)" stroke-width="2.5"/>
+    ${mk(S.py,'#8c9bf0',pyD.complete)}${mk(S.cy,'#e8b15a',cyD.complete)}</svg>`;
+  $('#chartNote').textContent=FLAGS.partial?'Solid = complete day. A hollow marker is a partial day; later current-year days fall outside this dataset.':'Solid markers = complete days.';
+}
+
+/* ---------- day by day ---------- */
+function dailyTable(){
+  const adM=(label,fmt,key)=>[label,i=>pyD.ad[i]?fmt(pyD.ad[i]):'—',i=>cyD.ad[i]?fmt(cyD.ad[i]):'—'];
+  const m=[
+    ['Total sales',i=>usd(pyD.sales[i]),i=>cyD.sales[i]==null?'—':usd(cyD.sales[i])],
+    ['Units',i=>num(pyD.units[i]),i=>cyD.units[i]==null?'—':num(cyD.units[i])],
+    adM('Ad spend',a=>usd(a.cost)),adM('Ad sales',a=>usd(a.adsales)),adM('Impressions',a=>num(a.impr)),adM('Clicks',a=>num(a.clk)),
+    adM('CPC',a=>usd(a.cost/a.clk,2)),adM('ACoS',a=>pct(a.cost/a.adsales*100)),adM('Ad orders',a=>num(a.orders)),adM('NTB orders',a=>num(a.ntbO)),
+    ['TACoS',i=>pct(pyD.ad[i].cost/pyD.sales[i]*100),i=>(cyD.ad[i]&&cyD.sales[i])?pct(cyD.ad[i].cost/cyD.sales[i]*100):'—']
+  ];
+  let h=`<thead><tr><th>Metric</th>`;
+  for(let i=0;i<EVLEN;i++) h+=`<th class="d">Day ${i+1}<br><span class="mt">${pyD.dates[i]} · ${cyD.dates[i]}</span></th>`;
+  h+=`</tr></thead><tbody>`;
+  m.forEach(r=>{h+=`<tr><td>${r[0]}</td>`;for(let i=0;i<EVLEN;i++){const partial=cyD.ad[i]&&!cyD.complete[i]?'<span class="partial">partial</span>':'';h+=`<td class="d"><div style="color:var(--cy)" class="num">${r[2](i)}${partial}</div><div style="color:var(--py)" class="num">${r[1](i)}</div></td>`;}h+=`</tr>`;});
+  $('#dailyTbl').innerHTML=h+`</tbody>`;
+  if(!FLAGS.showTraffic){$('#trafficCard').remove();return;}
+  const tm=[
+    ['Sessions',i=>num(pyD.sessions[i]),i=>cyD.sessions[i]==null?'n/a':num(cyD.sessions[i])],
+    ['Page views',i=>num(pyD.pv[i]),i=>cyD.pv[i]==null?'n/a':num(cyD.pv[i])],
+    ['Site conv. (units/sessions)',i=>pyD.sessions[i]?pct(pyD.units[i]/pyD.sessions[i]*100):'—',i=>cyD.sessions[i]?pct(cyD.units[i]/cyD.sessions[i]*100):'n/a'],
+    ['Ad conv. (orders/clicks)',i=>pyD.ad[i]?pct(pyD.ad[i].orders/pyD.ad[i].clk*100):'—',i=>cyD.ad[i]?pct(cyD.ad[i].orders/cyD.ad[i].clk*100):'—'],
+    ['CTR (clicks/impr)',i=>pyD.ad[i]?pct(pyD.ad[i].clk/pyD.ad[i].impr*100,2):'—',i=>cyD.ad[i]?pct(cyD.ad[i].clk/cyD.ad[i].impr*100,2):'—']
+  ];
+  let th=`<thead><tr><th>Metric</th>`;for(let i=0;i<EVLEN;i++)th+=`<th class="d">Day ${i+1}</th>`;th+=`</tr></thead><tbody>`;
+  tm.forEach(r=>{th+=`<tr><td>${r[0]}</td>`;for(let i=0;i<EVLEN;i++){const cv=r[2](i);const t=cv==='n/a'?'<span style="color:var(--faint)">n/a</span>':`<span style="color:var(--cy)" class="num">${cv}</span>`;th+=`<td class="d">${t}<br><span style="color:var(--py)" class="num">${r[1](i)}</span></td>`;}th+=`</tr>`;});
+  $('#trafficTbl').innerHTML=th+`</tbody>`;
+  if(M.trafficPending) $('#trafficPending').innerHTML=`<span class="pending">${M.trafficPending}</span>`;
+}
+
+/* ---------- lift ---------- */
+function liftPanel(){
+  $('#liftMeta').textContent=M.liftMeta;
+  const bs={cy:avg(BASE.cy.sales),py:avg(BASE.py.sales)}, bu={cy:avg(BASE.cy.units),py:avg(BASE.py.units)}, ba={cy:avg(BASE.cy.adsales),py:avg(BASE.py.adsales)};
+  const cards=[
+    {l:'Total-sales lift',cy:eventDailyC/bs.cy,py:eventDailyP/bs.py,sub:`event day vs ${usd(bs.cy,0)}/day baseline`},
+    {l:'Units lift',cy:(PC.units/K)/bu.cy,py:(PP.units/K)/bu.py,sub:`event day vs ${num(Math.round(bu.cy))} units/day`},
+    {l:'Ad-sales lift',cy:(PC.adsales/K)/ba.cy,py:(PP.adsales/K)/ba.py,sub:`event day vs ${usd(ba.cy,0)}/day baseline`}
+  ];
+  $('#liftCards').innerHTML=cards.map(c=>`<div class="lift"><div class="ll">${c.l}</div><div class="lv num">${c.cy.toFixed(2)}×</div><div class="lp num">${M.pyLabel}: ${c.py.toFixed(2)}×</div><div class="lb">${c.sub}</div></div>`).join('');
+  const rows=[
+    ['Pre-event daily sales',usd(bs.cy,0),usd(bs.py,0),relChip(bs.cy,bs.py)],
+    ['Pre-event daily units',num(Math.round(bu.cy)),num(Math.round(bu.py)),relChip(bu.cy,bu.py)],
+    ['Pre-event daily ad sales',usd(ba.cy,0),usd(ba.py,0),relChip(ba.cy,ba.py)],
+    ['Event-day total sales',usd(eventDailyC),usd(eventDailyP),relChip(eventDailyC,eventDailyP)],
+    ['Total-sales lift',liftMultC.toFixed(2)+'×',liftMultP.toFixed(2)+'×','—'],
+    ['Ad-sales lift',adLiftC.toFixed(2)+'×',adLiftP.toFixed(2)+'×','—']
+  ];
+  $('#liftTbl').innerHTML=`<thead><tr><th>Metric</th><th><span class="yr-tag cy">${M.cyLabel}</span></th><th><span class="yr-tag py">${M.pyLabel}</span></th><th>YoY</th></tr></thead><tbody>`+
+    rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${r[1]}</td><td class="num" style="color:var(--py)">${r[2]}</td><td>${r[3]}</td></tr>`).join('')+`</tbody>`;
+  let p=`The brand went into the event running <b>${pctTxt(baselineDelta)}</b> ${baselineDelta>=0?'higher':'lower'} daily sales than it did pre-event a year ago (${usd(bs.cy,0)}/day vs ${usd(bs.py,0)}/day). `;
+  p+=strongerEvent?`The event spike multiple <b>grew</b> (${liftMultC.toFixed(1)}× vs ${liftMultP.toFixed(1)}× baseline), so the event itself worked harder this year. `:(weakerEvent?`The event spike multiple <b>softened</b> (${liftMultC.toFixed(1)}× vs ${liftMultP.toFixed(1)}×), so the YoY change is mostly the baseline, not the event. `:`The event spike multiple is <b>basically flat</b> (~${liftMultC.toFixed(1)}× both years), so most of the YoY change is the higher baseline, not a stronger event reaction. `);
+  p+=`Ads lifted ${adLiftC>=adLiftP?'more':'less'} over baseline this year (${adLiftC.toFixed(1)}× vs ${adLiftP.toFixed(1)}×).`;
+  const tk = strongerEvent?`The event format is working; document what drove the stronger spike (deals, budget ramp, creative) so it carries to the next event.`:`The baseline is ${baselineDelta>=0?'healthy':'soft'}; the lever is making the event itself spike harder — test deeper/earlier deals and an upper-funnel ramp in the days before to push the multiple above ${liftMultC.toFixed(1)}×.`;
+  $('#liftInsight').innerHTML=`<h3>${strongerEvent?'A stronger event on a '+(baselineDelta>=0?'higher':'lower')+' baseline':'A bigger starting line, not a bigger spike'}</h3><p>${p}</p><div class="takeaway"><b>Next time</b> ${tk}</div>`;
+}
+
+/* ---------- keywords ---------- */
+let kwYear=Object.keys(D.keywords).includes('cy')?'cy':'py';
+$('#kwYear').innerHTML=`<button class="seg on" data-y="cy">${M.cyLabel}</button><button class="seg" data-y="py">${M.pyLabel}</button>`;
+const kwM=r=>({...r,roas:r.sales/r.cost,acos:r.sales>0?r.cost/r.sales*100:null,cpc:r.cost/r.clk});
+function kwTables(){
+  const data=(D.keywords[kwYear]||[]).map(kwM);
+  $('#kwScope').textContent=(kwYear==='cy'?M.cyLabel:M.pyLabel)+' event window';
+  const top=[...data].sort((a,b)=>b.sales-a.sales).slice(0,12);
+  const bot=[...data].filter(r=>r.cost>=8).sort((a,b)=>{const aa=a.acos==null?1e9:a.acos,bb=b.acos==null?1e9:b.acos;return bb!==aa?bb-aa:b.cost-a.cost;}).slice(0,12);
+  $('#kwTop').innerHTML=kwTbl(top); $('#kwBot').innerHTML=kwTbl(bot);
+}
+function kwTbl(rows){
+  const head=`<thead><tr><th>Keyword</th><th>Match</th><th>Spend</th><th>Sales</th><th>ACoS</th><th>ROAS</th><th>CPC</th><th>Ord</th></tr></thead>`;
+  return head+'<tbody>'+rows.map(r=>{const acos=r.acos==null?'<span class="bad">no sales</span>':pct(r.acos);const cls=r.acos==null?'bad':(r.acos>40?'bad':(r.acos<20?'good':''));
+    return `<tr><td class="kw">${r.t}</td><td><span class="mt">${r.mt||''}</span></td><td>${usd(r.cost,2)}</td><td>${usd(r.sales)}</td><td class="${cls}">${acos}</td><td>${r.acos==null?'—':r.roas.toFixed(1)+'x'}</td><td>${usd(r.cpc,2)}</td><td>${r.orders}</td></tr>`;}).join('')+'</tbody>';
+}
+
+/* ---------- products ---------- */
+let prodView=(D.products.movers&&D.products.movers.length)?'movers':'todate';
+if(!(D.products.movers&&D.products.movers.length)) $('#moversBtn').style.display='none';
+function stockBadge(inv){
+  if(!inv) return '<span class="mt">—</span>';
+  const cov = inv.cover!=null? ' · ~'+inv.cover+'d' : '';
+  if(inv.status==='out') return '<span class="chip down">out of stock</span>';
+  if(inv.status==='inbound') return '<span class="chip warn">out · inbound</span>';
+  if(inv.status==='low') return '<span class="chip warn">low'+cov+'</span>';
+  return '<span class="chip up">in stock'+cov+'</span>';
+}
+function productsTable(){
+  const list = prodView==='movers'?D.products.movers:D.products.todate;
+  const anyInv = list.some(p=>p.inv);
+  if(prodView==='movers'){
+    $('#prodScope').textContent=M.moversScope; $('#prodNote').textContent=M.moversNote;
+  }else{
+    $('#prodScope').textContent=M.todateScope; $('#prodNote').textContent=M.todateNote;
+  }
+  const max=Math.max(1,...list.map(p=>Math.max(p.sales25,p.sales26)));
+  const showYoY = prodView==='movers';
+  const head=`<thead><tr><th>Product</th><th>${M.cyLabel} sales</th><th>Units</th><th>${M.pyLabel} sales</th><th>Units</th>${showYoY?'<th>YoY</th>':''}${anyInv?'<th>Stock</th>':''}</tr></thead>`;
+  $('#prodTbl').innerHTML=head+'<tbody>'+list.map(p=>{
+    const w26=(p.sales26/max*100).toFixed(1), w25=(p.sales25/max*100).toFixed(1);
+    let chip='';
+    if(showYoY) chip=p.sales25===0?'<span class="chip flat">new</span>':(p.sales26===0?'<span class="chip down">−100%</span>':relChip(p.sales26,p.sales25));
+    return `<tr><td class="kw"><div style="color:var(--ink)">${p.name}</div><span class="mt">${p.asin}</span></td>
+      <td class="barcell"><span class="bar" style="width:${w26}%"></span><span>${usd(p.sales26)}</span></td><td>${num(p.units26)}</td>
+      <td class="barcell"><span class="bar py" style="width:${w25}%"></span><span style="color:var(--py)">${usd(p.sales25)}</span></td><td style="color:var(--py)">${num(p.units25)}</td>${showYoY?`<td>${chip}</td>`:''}${anyInv?`<td>${stockBadge(p.inv)}</td>`:''}</tr>`;}).join('')+'</tbody>';
+}
+
+/* ---------- deals ---------- */
+function dealsPanel(){
+  if(!FLAGS.showDeals) return;
+  const dl=D.deals, py=dl.py||[], cy=dl.cy||[];
+  const rev=sum(py.map(d=>d.revenue||0)), un=sum(py.map(d=>d.units||0)), gl=sum(py.map(d=>d.glance||0));
+  const eventTotal=sum(pyD.sales);
+  const k=[{l:`${M.pyLabel} deal revenue`,v:usd(rev)},{l:'Share of event sales',v:eventTotal?pct(rev/eventTotal*100):'—'},{l:'Deal units sold',v:num(un)},{l:'Glance → purchase',v:gl?pct(un/gl*100):'—'}];
+  $('#dealKpis').innerHTML=k.map(c=>`<div class="kpi soft"><div class="k-l">${c.l}</div><div class="k-v num" style="font-size:22px">${c.v}</div></div>`).join('');
+  $('#deal25Head').innerHTML=`${M.pyLabel} ${dl.pyTypeLabel||'Deals'} <span class="mt">— finalized</span>`;
+  $('#deal25').innerHTML=`<thead><tr><th>Product</th><th>Window</th><th>Units</th><th>Revenue</th><th>Glance views</th><th>Conv.</th></tr></thead><tbody>`+
+    [...py].sort((a,b)=>(b.revenue||0)-(a.revenue||0)).map(d=>`<tr><td class="kw">${d.name}<br><span class="mt">${d.asin}</span></td><td>${d.window||'—'}</td><td>${num(d.units)}</td><td>${usd(d.revenue)}</td><td>${num(d.glance)}</td><td>${d.glance?pct(d.units/d.glance*100):'—'}</td></tr>`).join('')+`</tbody>`;
+  if(cy.length){
+    $('#deal26Head').innerHTML=`${M.cyLabel} ${dl.cyTypeLabel||'Deals'}`;
+    const cyHasPerf = cy.some(d=>(d.revenue||0)>0||(d.units||0)>0);
+    $('#deal26').innerHTML=cyHasPerf
+      ? `<thead><tr><th>Product</th><th>Window</th><th>Units</th><th>Revenue</th><th>Glance views</th><th>Conv.</th></tr></thead><tbody>`+[...cy].sort((a,b)=>(b.revenue||0)-(a.revenue||0)).map(d=>`<tr><td class="kw">${d.name}<br><span class="mt">${d.asin}</span></td><td>${d.window||'—'}</td><td>${num(d.units)}</td><td>${usd(d.revenue)}</td><td>${num(d.glance)}</td><td>${d.glance?pct(d.units/d.glance*100):'—'}</td></tr>`).join('')+`</tbody>`
+      : `<thead><tr><th>Product</th><th>Type</th><th>Window</th><th>Status</th></tr></thead><tbody>`+cy.map(d=>`<tr><td class="kw">${d.name}<br><span class="mt">${d.asin}</span></td><td>${dl.cyTypeLabel||'Deal'}</td><td>${d.window||'—'}</td><td><span style="color:var(--cy)">${d.status||'pending'}</span></td></tr>`).join('')+`</tbody>`;
+    if(!cyHasPerf && M.dealsPending) $('#deal26Pending').innerHTML=`<span class="pending">${M.dealsPending}</span>`;
+  } else { $('#deal26Card').remove(); }
+  $('#dealsInsight').innerHTML=`<h3>${dl.insightHead||'Deal contribution'}</h3><p>${dl.insight||''}</p>${dl.takeaway?`<div class="takeaway"><b>Next time</b> ${dl.takeaway}</div>`:''}`;
+  $('#couponsNote').textContent=dl.couponsNote||'';
+}
+
+/* ---------- campaign type ---------- */
+function ctypeTable(){
+  $('#ctMeta').textContent=M.ctMeta;
+  const C=D.ctype||[];
+  const head=`<thead><tr><th>Campaign type</th><th>${M.cyLabel} spend</th><th>${M.cyLabel} sales</th><th>${M.cyLabel} ACoS</th><th>${M.cyLabel} CPC</th><th>${M.pyLabel} spend</th><th>${M.pyLabel} sales</th><th>${M.pyLabel} ACoS</th><th>${M.pyLabel} CPC</th></tr></thead>`;
+  const tot={cost25:0,sales25:0,clk25:0,cost26:0,sales26:0,clk26:0};C.forEach(c=>{for(const k in tot)tot[k]+=c[k]||0;});
+  const row=(c,t)=>`<tr ${t?'style="border-top:2px solid var(--line);font-weight:600"':''}><td>${c.type}</td><td>${usd(c.cost26,2)}</td><td>${usd(c.sales26)}</td><td>${c.sales26>0?pct(c.cost26/c.sales26*100):'—'}</td><td>${c.clk26>0?usd(c.cost26/c.clk26,2):'—'}</td><td style="color:var(--py)">${usd(c.cost25,2)}</td><td style="color:var(--py)">${usd(c.sales25)}</td><td style="color:var(--py)">${c.sales25>0?pct(c.cost25/c.sales25*100):'—'}</td><td style="color:var(--py)">${c.clk25>0?usd(c.cost25/c.clk25,2):'—'}</td></tr>`;
+  $('#ctTbl').innerHTML=head+'<tbody>'+C.map(c=>row(c,false)).join('')+row({type:'Total',...tot},true)+'</tbody>';
+}
+
+/* ---------- DSP (optional — hidden when no spend) ---------- */
+function dspPanel(){
+  const w=$('#dspWrap'); const X=D.dsp;
+  if(!X||!X.show){ if(w) w.remove(); return; }
+  $('#dspMeta').textContent=X.meta||'';
+  const cy=X.cy||{}, py=X.py||{};
+  const both=(a,b)=> (a!=null&&b!=null&&b!==0);
+  const tiles=[
+    {l:'DSP spend', vc:usd(cy.cost,2), vp:usd(py.cost,2), chip:both(cy.cost,py.cost)?relChip(cy.cost,py.cost,{lowerBetter:true,neutral:true}):''},
+    {l:'DSP sales (14d)', vc:usd(cy.sales), vp:usd(py.sales), chip:both(cy.sales,py.sales)?relChip(cy.sales,py.sales):''},
+    {l:'DSP ACoS', vc:cy.acos==null?'—':pct(cy.acos), vp:py.acos==null?'—':pct(py.acos), chip:both(cy.acos,py.acos)?relChip(cy.acos,py.acos,{lowerBetter:true}):''},
+    {l:'DSP ROAS', vc:cy.roas==null?'—':cy.roas.toFixed(1)+'x', vp:py.roas==null?'—':py.roas.toFixed(1)+'x', chip:both(cy.roas,py.roas)?relChip(cy.roas,py.roas):''},
+    {l:'CPM', vc:cy.cpm==null?'—':usd(cy.cpm,2), vp:py.cpm==null?'—':usd(py.cpm,2), chip:both(cy.cpm,py.cpm)?relChip(cy.cpm,py.cpm,{lowerBetter:true,neutral:true}):''},
+    {l:'New-to-brand share', vc:cy.ntbShare==null?'—':pct(cy.ntbShare), vp:py.ntbShare==null?'—':pct(py.ntbShare), chip:both(cy.ntbShare,py.ntbShare)?relChip(cy.ntbShare,py.ntbShare):''}
+  ];
+  $('#dspKpis').innerHTML=tiles.map(c=>`<div class="kpi soft"><div class="k-l">${c.l}</div><div class="k-v num" style="font-size:22px">${c.vc}</div><div class="k-py num">${M.pyLabel}: <b>${c.vp}</b></div>${c.chip||''}</div>`).join('');
+  $('#dspNote').textContent=X.note||'';
+}
+
+/* ---------- starfield (seeded → deterministic) ---------- */
+function stars(){let s=42,h='';const r=()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;};for(let i=0;i<46;i++){h+=`<circle cx="${(r()*1180).toFixed(0)}" cy="${(r()*200).toFixed(0)}" r="${(r()*1.1+0.3).toFixed(2)}" fill="#cdd6ff" opacity="${(r()*0.6+0.15).toFixed(2)}"/>`;}$('.stars').innerHTML=h;}
+
+/* ---------- events ---------- */
+$('#metricSeg').addEventListener('click',e=>{const b=e.target.closest('.seg');if(!b)return;$$('#metricSeg .seg').forEach(s=>s.classList.toggle('on',s===b));chartMetric=b.dataset.m;chart();});
+$('#kwYear').addEventListener('click',e=>{const b=e.target.closest('.seg');if(!b)return;$$('#kwYear .seg').forEach(s=>s.classList.toggle('on',s===b));kwYear=b.dataset.y;kwTables();});
+$('#prodView').addEventListener('click',e=>{const b=e.target.closest('.seg');if(!b)return;$$('#prodView .seg').forEach(s=>s.classList.toggle('on',s===b));prodView=b.dataset.v;productsTable();});
+
+/* init */
+function stockWatch(){const el=$('#stockWatch');if(M.stockWatch){el.innerHTML=M.stockWatch;}else{el.remove();}}
+stars();kpiCards();qualityCards();buildExec();buildWhatChanged();stockWatch();rollup();chart();dailyTable();liftPanel();kwTables();productsTable();dealsPanel();ctypeTable();dspPanel();
+</script>
+</body>
+</html>
